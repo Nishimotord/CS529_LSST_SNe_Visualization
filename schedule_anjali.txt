@@ -1,0 +1,4 @@
+1. Analyzing the dataset(Old SNE- smaller dataset)
+2. Analyzing the second dataset (LSST - bigger dataset)
+3. Attributes and the datatypes
+4. Plot the data using three.js
