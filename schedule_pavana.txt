@@ -1,0 +1,5 @@
+1. Get the Domain knowledge.
+2. Understand and analyse the first and smaller dataset.(Old SNe dataset.)
+3. Understand and analyse the second and larger dataset.(LSST dataset)
+4. Plot the data using Three.js
+
