@@ -1,0 +1,4 @@
+1 - analyze first data set (old SNe)
+2 - plot data set Three.js
+3 - analyse LSST data set
+4 - plot dataset using Three.js
