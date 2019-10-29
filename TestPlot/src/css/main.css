@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+}
+
+.plotDiv {
+  background-color: #7f0000;
+}
+#scene,
+#plot {
+  width: 90%;
+  height: 90%;
+}
+
+/* SVG styling */
+svg {
+  font-family: helvetica, sans-serif;
+}
+
+path,
+line {
+  stroke: #777;
+}
