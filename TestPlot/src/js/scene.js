@@ -1,4 +1,16 @@
-/* author: Andrew Burks */
+/* 
+Author: Andrew Burks 
+Modified by: 
+  Pavana Doddi
+  Ryan Nishimoto
+  Anjali Yadla
+
+For CS 529: Visual Data Science 
+LSST SNe Visualization Project
+University of Illinois at Chicago
+
+
+*/
 "use strict";
 /* Create a Threejs scene for the application */
 

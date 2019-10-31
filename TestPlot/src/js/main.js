@@ -1,3 +1,16 @@
+/* 
+Author: Andrew Burks 
+Modified by: 
+  Pavana Doddi
+  Ryan Nishimoto
+  Anjali Yadla
+
+For CS 529: Visual Data Science 
+LSST SNe Visualization Project
+University of Illinois at Chicago
+
+
+*/
 "use strict";
 
 /* Get or create the application global variable */
