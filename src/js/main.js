@@ -30,6 +30,7 @@ var App = App || {};
     const particleSystem = new ParticleSystem();
 
     // Switch between data sets
+    particleSystem.initialize("data/LSSTConverted.csv");
     particleSystem.initialize("data/OpenSNCatConverted.csv");
 
     //add the particle system to the scene

@@ -21,9 +21,11 @@ var App = App || {};
 */
 
 // size of particle (suggested: 0.01 - .1)
-var particleSize = 0.05;
+var particleSize = 0.1;
 
 var showAxis = true;
+
+var isOld = false;
 
 // Start of ParticleSystem function
 
@@ -32,9 +34,8 @@ const ParticleSystem = function() {
   const self = this;
 
   // data containers
-  const data = [];
-
-  var plotData = [];
+  const oldData = [];
+  const lsstData = [];
 
   // scene graph group for the particle system
   const sceneObject = new THREE.Group();
@@ -69,23 +70,31 @@ const ParticleSystem = function() {
   };
 
   // creates the particle system
-  self.createParticleSystem = function() {
+  self.createParticleSystem = function(data, dsource) {
+    console.log(dsource + ": " + data.length);
     // use self.data to create the particle system
     // draw your particle system here!
-    console.log(data.length + " particles");
     var pGeometry = new THREE.Geometry();
-    plotData = [];
     for (var i = 0; i < data.length; i++) {
       // particle data in cartesian coordinates of units Mpc
-      var particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
-      pGeometry.vertices.push(particle);
+      if (data[i].X == 0 && data[i].Y == 0 && data[i].Z == 0) {
+      } else {
+        var particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
+        pGeometry.vertices.push(particle);
 
-      // default to white
-      var color = new THREE.Color(0xffffff);
-      pGeometry.colors.push(color);
+        // default to white
+        if (dsource == "old") {
+          var color = new THREE.Color(0xffffff);
+          pGeometry.colors.push(color);
+        } else if (dsource == "lsst") {
+          var color = new THREE.Color(0x0000ff);
+          pGeometry.colors.push(color);
+        }
+      }
     }
     var pMaterial = new THREE.PointsMaterial({
-      size: particleSize
+      size: particleSize,
+      vertexColors: THREE.VertexColors
     });
     var pSystem = new THREE.Points(pGeometry, pMaterial);
     sceneObject.add(pSystem);
@@ -93,6 +102,7 @@ const ParticleSystem = function() {
 
   // data loading function
   self.loadData = function(file) {
+    console.log("Data: " + file);
     // read the csv file
     d3.csv(file)
       // iterate over the rows of the csv file
@@ -107,29 +117,43 @@ const ParticleSystem = function() {
         bounds.maxY = Math.max(bounds.maxY || -Infinity, d.Points1);
         bounds.maxZ = Math.max(bounds.maxY || -Infinity, d.Points2);
 
-        // add the element to the data collection
-        data.push({
-          // SNe Name, host, type
-          Name: String(d.name),
-          Host: String(d.host),
-          Type: String(d.type),
-          // Position
-          X: Number(d.x),
-          Y: Number(d.y),
-          Z: Number(d.z),
-          // Time
-          T: Number(d.t),
-          // Luminosity
-          L: Number(d.log10lum)
-        });
+        if (file == "data/OpenSNCatConverted.csv") {
+          oldData.push({
+            // Luminosity
+            // SNe Name, host, type
+            Name: String(d.name),
+            Host: String(d.host),
+            Type: String(d.type),
+            // Position
+            X: Number(d.x),
+            Y: Number(d.y),
+            Z: Number(d.z),
+            // Time
+            T: Number(d.t),
+            // Luminosity
+            L: Number(d.log10lum)
+          });
+        } else if (file == "data/LSSTConverted.csv") {
+          lsstData.push({
+            // Position
+            Type: String(d.type),
+            X: Number(d.x),
+            Y: Number(d.y),
+            Z: Number(d.z),
+            // Time
+            T: Number(d.t)
+          });
+        }
       })
       // when done loading
       .get(function() {
         // draw Axis
         if (showAxis) self.drawAxis();
 
-        // create the particle system
-        self.createParticleSystem();
+        // create the particle system for old data
+        self.createParticleSystem(oldData, "old");
+        // create the particle system for lsst data
+        self.createParticleSystem(lsstData, "lsst");
       });
   };
 
