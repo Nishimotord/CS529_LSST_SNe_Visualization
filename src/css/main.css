@@ -20,3 +20,8 @@ path,
 line {
   stroke: #777;
 }
+
+.dg .c select {
+  margin-top: 4px;
+  color: black;
+}

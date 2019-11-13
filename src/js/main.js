@@ -30,7 +30,7 @@ var App = App || {};
     const particleSystem = new ParticleSystem();
 
     // Switch between data sets
-    particleSystem.initialize("data/OpenSNCatConverted.csv");
+    particleSystem.initialize();
 
     //add the particle system to the scene
     App.scene.addObject(particleSystem.getParticleSystems());

@@ -24,6 +24,7 @@ var App = App || {};
 var particleSize = 0.05;
 
 var showAxis = true;
+// var showSNeV;
 
 // Start of ParticleSystem function
 
@@ -32,7 +33,8 @@ const ParticleSystem = function() {
   const self = this;
 
   // data containers
-  const data = [];
+  const oldData = [];
+  const lsstData = [];
 
   var plotData = [];
 
@@ -41,6 +43,14 @@ const ParticleSystem = function() {
 
   // bounds of the data
   var bounds = {};
+
+  // Variables for geometry, materials, objects.
+  var pGeometry;
+  var particle;
+  var pOldMaterial;
+  var pOldSystem;
+  var pLsstMaterial;
+  var pLsstSystem;
 
   // Create an x,y,z axis (r,g,b)
   self.drawAxis = function() {
@@ -69,32 +79,118 @@ const ParticleSystem = function() {
   };
 
   // creates the particle system
-  self.createParticleSystem = function() {
+  self.createParticleSystem = function(data, dsource) {
+    console.log(dsource + ": " + data.length);
     // use self.data to create the particle system
     // draw your particle system here!
-    console.log(data.length + " particles");
-    var pGeometry = new THREE.Geometry();
-    plotData = [];
+    pGeometry = new THREE.Geometry();
     for (var i = 0; i < data.length; i++) {
       // particle data in cartesian coordinates of units Mpc
-      var particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
-      pGeometry.vertices.push(particle);
+      if (data[i].X == 0 && data[i].Y == 0 && data[i].Z == 0) {
+      } else {
+        particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
+        pGeometry.vertices.push(particle);
 
-      // default to white
-      var color = new THREE.Color(0xffffff);
-      pGeometry.colors.push(color);
+        // default to white
+        if (dsource == "old") {
+          var color = new THREE.Color(0xffffff);
+          pGeometry.colors.push(color);
+        } else if (dsource == "lsst") {
+          var color = new THREE.Color(0x0000ff);
+          pGeometry.colors.push(color);
+        }
+      }
     }
-    var pMaterial = new THREE.PointsMaterial({
-      size: particleSize
-    });
-    var pSystem = new THREE.Points(pGeometry, pMaterial);
-    sceneObject.add(pSystem);
+    // Creates and adds two objects to the scene. One for each of the datasets.
+    if(dsource == "old"){
+      pOldMaterial = new THREE.PointsMaterial({
+        size: particleSize,
+        vertexColors: THREE.VertexColors
+      });
+      pOldSystem = new THREE.Points(pGeometry, pOldMaterial);
+      sceneObject.add(pOldSystem);
+    }
+    else if(dsource == "lsst"){
+      pLsstMaterial = new THREE.PointsMaterial({
+        size: particleSize,
+        vertexColors: THREE.VertexColors
+      });
+      pLsstSystem = new THREE.Points(pGeometry, pLsstMaterial);
+      sceneObject.add(pLsstSystem);
+    }
   };
 
+  // Various options for GUI.
+  var defaultGui = function() {
+    this.ShowSNe = true;
+    this.ShowLsst = true;
+    this.Type = [];
+    this.colorSNe = '#ffffff';
+    this.colorLsst = '#0000ff';
+    this.Time = 0;
+  };
+  
+  // GUI related stuff.
+  var text = new defaultGui();
+  var gui = new dat.GUI();
+  var dataFolder = gui.addFolder('Data');
+  dataFolder.add(text, 'ShowSNe').name('Show old SNe').listen().onChange(
+    function(){
+      if(text.ShowSNe){
+        pOldSystem.visible = true;
+        pOldSystem.needsUpdate = true;
+      }
+      else{
+        pOldSystem.visible = false;
+        pOldSystem.needsUpdate = true;
+      }
+    }
+  );
+  dataFolder.add(text, 'ShowLsst').name('Show Lsst data').listen().onChange(
+    function(){
+      if(text.ShowLsst){
+        pLsstSystem.visible = true;
+        pLsstSystem.needsUpdate = true;
+      }
+      else{
+        pLsstSystem.visible = false;
+        pLsstSystem.needsUpdate = true;
+      }
+    }
+  )
+  dataFolder.open();
+  var dropdown = gui.add(text, 'Type', ['I', 'Ia', 'II', 'None']).onChange(
+    function(){
+      console.log(text.Type);
+      if(text.Type == 'None'){
+        // TODO: FILTER BY TYPE.
+      }
+    }
+  );
+  dropdown.setValue('None');
+  gui.add(text, 'Time', 1985, 2023).onChange(
+    function(){
+      //TODO: FILTER BY TIME.
+    }
+  )
+  var colorFolder = gui.addFolder('Color');
+  colorFolder.addColor(text, 'colorSNe').name('Old data color').onChange(
+    function(){
+      console.log(text.colorSNe);
+      pOldSystem.material.color.set(text.colorSNe);
+    }
+  );
+  colorFolder.addColor(text, 'colorLsst').name('Lsst data color').onChange(
+    function(){
+      pLsstSystem.material.color.set(text.colorLsst);
+    }
+  )
+
   // data loading function
-  self.loadData = function(file) {
-    // read the csv file
-    d3.csv(file)
+  self.loadData = function() {
+    // read the old SNe csv file
+    console.log("Loading Data: data/OpenSNCatConverted.csv");
+    d3.csv("data/OpenSNCatConverted.csv")
       // iterate over the rows of the csv file
       .row(function(d) {
         // get the min bounds
@@ -106,9 +202,8 @@ const ParticleSystem = function() {
         bounds.maxX = Math.max(bounds.maxX || -Infinity, d.Points0);
         bounds.maxY = Math.max(bounds.maxY || -Infinity, d.Points1);
         bounds.maxZ = Math.max(bounds.maxY || -Infinity, d.Points2);
-
-        // add the element to the data collection
-        data.push({
+        oldData.push({
+          // Luminosity
           // SNe Name, host, type
           Name: String(d.name),
           Host: String(d.host),
@@ -125,19 +220,36 @@ const ParticleSystem = function() {
       })
       // when done loading
       .get(function() {
-        // draw Axis
-        if (showAxis) self.drawAxis();
+        // create the particle system for old data
+        self.createParticleSystem(oldData, "old");
+      });
 
-        // create the particle system
-        self.createParticleSystem();
+    console.log("Loading Data: data/LSSTConverted.csv");
+    d3.csv("data/LSSTConverted.csv")
+      // iterate over the rows of the csv file
+      .row(function(d) {
+        lsstData.push({
+          // Position
+          Type: String(d.type),
+          X: Number(d.x),
+          Y: Number(d.y),
+          Z: Number(d.z),
+          // Time
+          T: Number(d.t)
+        });
+      })
+      // when done loading
+      .get(function() {
+        // create the particle system for lsst data
+        self.createParticleSystem(lsstData, "lsst");
       });
   };
 
   // publicly available functions
   self.public = {
     // load the data and setup the system
-    initialize: function(file) {
-      self.loadData(file);
+    initialize: function() {
+      self.loadData();
     },
 
     // accessor for the particle system
