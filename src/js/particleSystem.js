@@ -38,6 +38,14 @@ const ParticleSystem = function() {
   // bounds of the data
   var bounds = {};
 
+  // Variables for geometry, materials, objects.
+  var pGeometry;
+  var particle;
+  var pOldMaterial;
+  var pOldSystem;
+  var pLsstMaterial;
+  var pLsstSystem;
+
   // Create an x,y,z axis (r,g,b)
   self.drawAxis = function() {
     // create axis lines (x,y,z, - r,g,b)
@@ -69,31 +77,109 @@ const ParticleSystem = function() {
     console.log(dsource + ": " + data.length);
     // use self.data to create the particle system
     // draw your particle system here!
-    var pGeometry = new THREE.Geometry();
+    pGeometry = new THREE.Geometry();
     for (var i = 0; i < data.length; i++) {
       // particle data in cartesian coordinates of units Mpc
-      if (data[i].X === 0 && data[i].Y === 0 && data[i].Z === 0) {
+      if (data[i].X == 0 && data[i].Y == 0 && data[i].Z == 0) {
       } else {
-        var particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
+        particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
         pGeometry.vertices.push(particle);
 
         // default to white
-        if (dsource === "old") {
+        if (dsource == "old") {
           var color = new THREE.Color(0xffffff);
           pGeometry.colors.push(color);
-        } else if (dsource === "lsst") {
+        } else if (dsource == "lsst") {
           var color = new THREE.Color(0x0000ff);
           pGeometry.colors.push(color);
         }
       }
     }
-    var pMaterial = new THREE.PointsMaterial({
-      size: particleSize,
-      vertexColors: THREE.VertexColors
-    });
-    var pSystem = new THREE.Points(pGeometry, pMaterial);
-    sceneObject.add(pSystem);
+    // Creates and adds two objects to the scene. One for each of the datasets.
+    if (dsource == "old") {
+      pOldMaterial = new THREE.PointsMaterial({
+        size: particleSize,
+        vertexColors: THREE.VertexColors
+      });
+      pOldSystem = new THREE.Points(pGeometry, pOldMaterial);
+      sceneObject.add(pOldSystem);
+    } else if (dsource == "lsst") {
+      pLsstMaterial = new THREE.PointsMaterial({
+        size: particleSize,
+        vertexColors: THREE.VertexColors
+      });
+      pLsstSystem = new THREE.Points(pGeometry, pLsstMaterial);
+      sceneObject.add(pLsstSystem);
+    }
   };
+
+  // Various options for GUI.
+  var defaultGui = function() {
+    this.ShowSNe = true;
+    this.ShowLsst = true;
+    this.Type = [];
+    this.colorSNe = "#ffffff";
+    this.colorLsst = "#0000ff";
+    this.Time = 0;
+  };
+
+  // GUI related stuff.
+  var text = new defaultGui();
+  var gui = new dat.GUI();
+  var dataFolder = gui.addFolder("Data");
+  dataFolder
+    .add(text, "ShowSNe")
+    .name("Show old SNe")
+    .listen()
+    .onChange(function() {
+      if (text.ShowSNe) {
+        pOldSystem.visible = true;
+        pOldSystem.needsUpdate = true;
+      } else {
+        pOldSystem.visible = false;
+        pOldSystem.needsUpdate = true;
+      }
+    });
+  dataFolder
+    .add(text, "ShowLsst")
+    .name("Show Lsst data")
+    .listen()
+    .onChange(function() {
+      if (text.ShowLsst) {
+        pLsstSystem.visible = true;
+        pLsstSystem.needsUpdate = true;
+      } else {
+        pLsstSystem.visible = false;
+        pLsstSystem.needsUpdate = true;
+      }
+    });
+  dataFolder.open();
+  var dropdown = gui
+    .add(text, "Type", ["I", "Ia", "II", "None"])
+    .onChange(function() {
+      console.log(text.Type);
+      if (text.Type == "None") {
+        // TODO: FILTER BY TYPE.
+      }
+    });
+  dropdown.setValue("None");
+  gui.add(text, "Time", 1985, 2023).onChange(function() {
+    //TODO: FILTER BY TIME.
+  });
+  var colorFolder = gui.addFolder("Color");
+  colorFolder
+    .addColor(text, "colorSNe")
+    .name("Old data color")
+    .onChange(function() {
+      console.log(text.colorSNe);
+      pOldSystem.material.color.set(text.colorSNe);
+    });
+  colorFolder
+    .addColor(text, "colorLsst")
+    .name("Lsst data color")
+    .onChange(function() {
+      pLsstSystem.material.color.set(text.colorLsst);
+    });
 
   // data loading function
   self.loadData = function() {
@@ -157,8 +243,8 @@ const ParticleSystem = function() {
   // publicly available functions
   self.public = {
     // load the data and setup the system
-    initialize: function(file) {
-      self.loadData(file);
+    initialize: function() {
+      self.loadData();
     },
 
     // accessor for the particle system
