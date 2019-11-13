@@ -101,10 +101,10 @@ const ParticleSystem = function() {
   };
 
   // data loading function
-  self.loadData = function(file) {
-    console.log("Data: " + file);
-    // read the csv file
-    d3.csv(file)
+  self.loadData = function() {
+    // read the old SNe csv file
+    console.log("Loading Data: data/OpenSNCatConverted.csv");
+    d3.csv("data/OpenSNCatConverted.csv")
       // iterate over the rows of the csv file
       .row(function(d) {
         // get the min bounds
@@ -116,42 +116,44 @@ const ParticleSystem = function() {
         bounds.maxX = Math.max(bounds.maxX || -Infinity, d.Points0);
         bounds.maxY = Math.max(bounds.maxY || -Infinity, d.Points1);
         bounds.maxZ = Math.max(bounds.maxY || -Infinity, d.Points2);
-
-        if (file == "data/OpenSNCatConverted.csv") {
-          oldData.push({
-            // Luminosity
-            // SNe Name, host, type
-            Name: String(d.name),
-            Host: String(d.host),
-            Type: String(d.type),
-            // Position
-            X: Number(d.x),
-            Y: Number(d.y),
-            Z: Number(d.z),
-            // Time
-            T: Number(d.t),
-            // Luminosity
-            L: Number(d.log10lum)
-          });
-        } else if (file == "data/LSSTConverted.csv") {
-          lsstData.push({
-            // Position
-            Type: String(d.type),
-            X: Number(d.x),
-            Y: Number(d.y),
-            Z: Number(d.z),
-            // Time
-            T: Number(d.t)
-          });
-        }
+        oldData.push({
+          // Luminosity
+          // SNe Name, host, type
+          Name: String(d.name),
+          Host: String(d.host),
+          Type: String(d.type),
+          // Position
+          X: Number(d.x),
+          Y: Number(d.y),
+          Z: Number(d.z),
+          // Time
+          T: Number(d.t),
+          // Luminosity
+          L: Number(d.log10lum)
+        });
       })
       // when done loading
       .get(function() {
-        // draw Axis
-        if (showAxis) self.drawAxis();
-
         // create the particle system for old data
         self.createParticleSystem(oldData, "old");
+      });
+
+    console.log("Loading Data: data/LSSTConverted.csv");
+    d3.csv("data/LSSTConverted.csv")
+      // iterate over the rows of the csv file
+      .row(function(d) {
+        lsstData.push({
+          // Position
+          Type: String(d.type),
+          X: Number(d.x),
+          Y: Number(d.y),
+          Z: Number(d.z),
+          // Time
+          T: Number(d.t)
+        });
+      })
+      // when done loading
+      .get(function() {
         // create the particle system for lsst data
         self.createParticleSystem(lsstData, "lsst");
       });
