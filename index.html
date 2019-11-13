@@ -1,51 +1,116 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
+<head>
+    <meta charset=utf-8>
 
-    <title>Assignment 3 -- three.js Robot</title>
 
-    <!-- CSS Libraries -->
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-    />
-    <!-- CSS Source -->
+    <title>Flow Visualization - three.js</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+
     <link rel="stylesheet" href="./src/css/main.css" />
 
-    <!-- JS Libraries -->
+
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="lib/js/three.min.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="lib/js/OrbitControls.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js"></script>
-    <script src="lib/js/three.js"></script>
-    <script src="lib/js/OrbitControls.js"></script>
 
-    <!-- JS Source -->
+
     <script src="./src/js/scene.js"></script>
     <script src="./src/js/particleSystem.js"></script>
     <script src="./src/js/main.js"></script>
-  </head>
+   
+    <style>
+        h1 {
+            color: ghostwhite;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
 
-  <body onload="App.start();">
-    <div class="container-fluid">
-      <p>
-        This is a Visualization currently showing the positional data of SNe
-        from <a href="https://sne.space/">The Open Supernovae Catalog</a>, which
-        as been processed by
-        <a
-          href="https://github.com/ageller/IDEAS_FSS-Vis/tree/master/WebGL/threejs/SNdata"
-          >Dr. Aaron Geller's repo</a
-        >
-        for use in his visualization course.
-      </p>
-      <p>
-        L-Mouse rotates the camera, R-Mouse pans the camera, Mid-Mouse does zoom
-      </p>
-      <div class="row">
-        <div class="particleDiv">
-          <div id="scene"></div>
-        </div>
-      </div>
+        .flex-container {
+            display: flex;
+            flex-wrap: nowrap;
+        }
+
+        body {
+            background-color: black;
+        }
+        
+        #butons{
+            float:right;
+        }
+        #count{
+            color:aliceblue;
+        }
+        #b5,#b3,#b4 {
+            
+            background-color: slategrey; /* Green */
+            border: none;
+            color: black;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            -webkit-transition-duration: 0.4s; /* Safari */
+            transition-duration: 0.4s;
+        }
+
+        #b5:hover {
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+        }
+        #b3:hover {
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+        }
+         #b4:hover {
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+        }
+        
+    </style>
+
+</head>
+
+<body onload="App.start();">
+    <h1 align="center">Supernova Visualization</h1>
+    <div id="buttons">
+       
+        <button id="b3">Reset</button>
+
+        <select id="b5">
+            <option value="none" selected>All types</option>
+            <option value="Candidate">Candidate</option>
+            <option value="II">Type II</option>
+            <option value="Ia">Type Ia</option>
+
+        </select>
+
+        <select id="b4">
+            <option value="none" selected>All discoveries</option>
+            <option value="2011">2011</option>
+            <option value="2012">2012</option>
+            <option value="2013">2013</option>
+
+        </select>
+
+        <text id="count"></text>
     </div>
-  </body>
+  
+        <div class="flex-container">
+
+            <div id="scene"></div>
+            <div id="scatter"> </div>
+
+        </div>
+        <div class="container-fluid"></div>
+
+        <div class="row"></div>
+        <div class="particleDiv col-md-6"></div>
+
+
+</body>
 </html>
