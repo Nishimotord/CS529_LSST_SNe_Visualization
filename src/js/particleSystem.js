@@ -1,37 +1,32 @@
 /* 
-Author: Andrew Burks 
-Modified by: 
+Authors: 
   Pavana Doddi
   Ryan Nishimoto
   Anjali Yadla
 
-For CS 529: Visual Data Science 
 LSST SNe Visualization Project
+CS529: Visual Data Science 
 University of Illinois at Chicago
 
-
+Built on Andrew Burk's Project 3 Base code
 */
 "use strict";
 
 /* Get or create the application global variable */
 var App = App || {};
 
-/*
-  variables for visualization
-*/
-
-// size of particle (suggested: 0.01 - .1)
-var particleSize = 0.1;
-
-var showAxis = true;
-
-var isOld = false;
-
 // Start of ParticleSystem function
 
 const ParticleSystem = function() {
   // setup the pointer to the scope 'this' variable
   const self = this;
+
+  // size of particle (suggested: 0.01 - .1)
+  var particleSize = 0.1;
+
+  var showAxis = true;
+
+  var isOld = false;
 
   // data containers
   const oldData = [];
@@ -77,16 +72,16 @@ const ParticleSystem = function() {
     var pGeometry = new THREE.Geometry();
     for (var i = 0; i < data.length; i++) {
       // particle data in cartesian coordinates of units Mpc
-      if (data[i].X == 0 && data[i].Y == 0 && data[i].Z == 0) {
+      if (data[i].X === 0 && data[i].Y === 0 && data[i].Z === 0) {
       } else {
         var particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
         pGeometry.vertices.push(particle);
 
         // default to white
-        if (dsource == "old") {
+        if (dsource === "old") {
           var color = new THREE.Color(0xffffff);
           pGeometry.colors.push(color);
-        } else if (dsource == "lsst") {
+        } else if (dsource === "lsst") {
           var color = new THREE.Color(0x0000ff);
           pGeometry.colors.push(color);
         }

@@ -1,15 +1,14 @@
 /* 
-Author: Andrew Burks 
-Modified by: 
+Authors: 
   Pavana Doddi
   Ryan Nishimoto
   Anjali Yadla
 
-For CS 529: Visual Data Science 
 LSST SNe Visualization Project
+CS529: Visual Data Science 
 University of Illinois at Chicago
 
-
+Built on Andrew Burk's Project 3 Base code
 */
 "use strict";
 /* Create a Threejs scene for the application */
@@ -24,16 +23,16 @@ const Scene = function(options) {
 
   // scale the width and height to the screen size
   const width = d3.select(".particleDiv").node().clientWidth;
-  const height = width * 0.85;
+  const height = width / 2;
 
   // create the scene
   self.scene = new THREE.Scene();
 
   // setup the camera
   self.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, -1);
-  self.camera.position.set(10, 15, 20);
+  self.camera.position.set(5000, 5000, 5000);
   self.camera.up = new THREE.Vector3(0, 1, 0);
-  self.camera.lookAt(100, 100, 100);
+  self.camera.lookAt(0, 0, 0);
 
   // Add a directional light to show off the objects
   const light = new THREE.DirectionalLight(0xffffff, 1.5);

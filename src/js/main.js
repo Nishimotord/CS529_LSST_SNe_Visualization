@@ -1,15 +1,14 @@
 /* 
-Author: Andrew Burks 
-Modified by: 
+Authors: 
   Pavana Doddi
   Ryan Nishimoto
   Anjali Yadla
 
-For CS 529: Visual Data Science 
 LSST SNe Visualization Project
+CS529: Visual Data Science 
 University of Illinois at Chicago
 
-
+Built on Andrew Burk's Project 3 Base code
 */
 "use strict";
 
