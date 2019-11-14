@@ -190,7 +190,7 @@ const ParticleSystem = function() {
   typeFolder.open();
 
   gui.add(text, "Time", 1885, 2025).onChange(function(val) {
-    yearBounds[1] = Math.round(val);
+    yearBounds[1] = Math.floor(val);
     console.log("upper bound set: " + yearBounds[1]);
     self.updateColors(yearBounds);
   });
@@ -227,8 +227,8 @@ const ParticleSystem = function() {
         if (
           oldData[i].Type === "Ia" &&
           text.ShowTypeIa &&
-          bounds[0] <= Math.round(oldData[i].T) &&
-          Math.round(oldData[i].T) <= bounds[1]
+          bounds[0] <= Math.floor(oldData[i].T) &&
+          Math.floor(oldData[i].T) <= bounds[1]
         ) {
           pOldSystem.geometry.colors[i].set(pColors[0]);
           pOldSystem.geometry.vertices[i].set(
@@ -239,8 +239,8 @@ const ParticleSystem = function() {
         } else if (
           oldData[i].Type === "I" &&
           text.ShowTypeI &&
-          bounds[0] <= Math.round(oldData[i].T) &&
-          Math.round(oldData[i].T) <= bounds[1]
+          bounds[0] <= Math.floor(oldData[i].T) &&
+          Math.floor(oldData[i].T) <= bounds[1]
         ) {
           pOldSystem.geometry.colors[i].set(pColors[2]);
           pOldSystem.geometry.vertices[i].set(
@@ -251,8 +251,8 @@ const ParticleSystem = function() {
         } else if (
           oldData[i].Type === "II" &&
           text.ShowTypeII &&
-          bounds[0] <= Math.round(oldData[i].T) &&
-          Math.round(oldData[i].T) <= bounds[1]
+          bounds[0] <= Math.floor(oldData[i].T) &&
+          Math.floor(oldData[i].T) <= bounds[1]
         ) {
           pOldSystem.geometry.colors[i].set(pColors[4]);
           pOldSystem.geometry.vertices[i].set(
@@ -281,8 +281,8 @@ const ParticleSystem = function() {
         if (
           lsstData[i].Type === "Ia" &&
           text.ShowTypeIa &&
-          yearBounds[0] <= Math.round(lsstData[i].T) &&
-          Math.round(lsstData[i].T) <= yearBounds[1]
+          yearBounds[0] <= Math.floor(lsstData[i].T) &&
+          Math.floor(lsstData[i].T) <= yearBounds[1]
         ) {
           pLsstSystem.geometry.colors[i].set(pColors[1]);
           pLsstSystem.geometry.vertices[i].set(
@@ -293,8 +293,8 @@ const ParticleSystem = function() {
         } else if (
           lsstData[i].Type === "I" &&
           text.ShowTypeI &&
-          yearBounds[0] <= Math.round(lsstData[i].T) &&
-          Math.round(lsstData[i].T) <= yearBounds[1]
+          yearBounds[0] <= Math.floor(lsstData[i].T) &&
+          Math.floor(lsstData[i].T) <= yearBounds[1]
         ) {
           pLsstSystem.geometry.colors[i].set(pColors[3]);
           pLsstSystem.geometry.vertices[i].set(
@@ -305,8 +305,8 @@ const ParticleSystem = function() {
         } else if (
           lsstData[i].Type === "II" &&
           text.ShowTypeII &&
-          yearBounds[0] <= Math.round(lsstData[i].T) &&
-          Math.round(lsstData[i].T) <= yearBounds[1]
+          yearBounds[0] <= Math.floor(lsstData[i].T) &&
+          Math.floor(lsstData[i].T) <= yearBounds[1]
         ) {
           pLsstSystem.geometry.colors[i].set(pColors[5]);
           pLsstSystem.geometry.vertices[i].set(
