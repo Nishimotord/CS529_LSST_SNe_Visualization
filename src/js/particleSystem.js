@@ -22,7 +22,7 @@ const ParticleSystem = function() {
   const self = this;
 
   // size of particle (suggested: 0.01 - .1)
-  var particleSize = 0.1;
+  var particleSize = 1;
 
   var showAxis = true;
 
@@ -45,6 +45,15 @@ const ParticleSystem = function() {
   var pOldSystem;
   var pLsstMaterial;
   var pLsstSystem;
+
+  var pColors = [
+    "#a6cee3",
+    "#1f78b4",
+    "#b2df8a",
+    "#33a02c",
+    "#fb9a99",
+    "#e31a1c"
+  ];
 
   // Create an x,y,z axis (r,g,b)
   self.drawAxis = function() {
@@ -90,7 +99,7 @@ const ParticleSystem = function() {
           var color = new THREE.Color(0xffffff);
           pGeometry.colors.push(color);
         } else if (dsource == "lsst") {
-          var color = new THREE.Color(0x0000ff);
+          var color = new THREE.Color(0xffffff);
           pGeometry.colors.push(color);
         }
       }
@@ -115,8 +124,11 @@ const ParticleSystem = function() {
 
   // Various options for GUI.
   var defaultGui = function() {
-    this.ShowSNe = true;
+    this.ShowOld = true;
     this.ShowLsst = true;
+    this.ShowTypeIa = true;
+    this.ShowTypeI = true;
+    this.ShowTypeII = true;
     this.Type = [];
     this.colorSNe = "#ffffff";
     this.colorLsst = "#0000ff";
@@ -126,43 +138,54 @@ const ParticleSystem = function() {
   // GUI related stuff.
   var text = new defaultGui();
   var gui = new dat.GUI();
-  var dataFolder = gui.addFolder("Data");
+  var dataFolder = gui.addFolder("Data set");
   dataFolder
-    .add(text, "ShowSNe")
+    .add(text, "ShowOld")
     .name("Show old SNe")
     .listen()
     .onChange(function() {
-      if (text.ShowSNe) {
-        pOldSystem.visible = true;
-        pOldSystem.needsUpdate = true;
-      } else {
-        pOldSystem.visible = false;
-        pOldSystem.needsUpdate = true;
-      }
+      self.updateColors();
     });
   dataFolder
     .add(text, "ShowLsst")
-    .name("Show Lsst data")
+    .name("Show LSST SNe")
     .listen()
     .onChange(function() {
+      self.updateColors();
+      /*
       if (text.ShowLsst) {
         pLsstSystem.visible = true;
         pLsstSystem.needsUpdate = true;
       } else {
         pLsstSystem.visible = false;
         pLsstSystem.needsUpdate = true;
-      }
+      }*/
     });
   dataFolder.open();
-  var dropdown = gui
-    .add(text, "Type", ["I", "Ia", "II", "None"])
+  var typeFolder = gui.addFolder("SNe Type");
+  typeFolder
+    .add(text, "ShowTypeIa")
+    .name("Show Type Ia SNe")
+    .listen()
     .onChange(function() {
-      console.log(text.Type);
-      if (text.Type == "None") {
-        // TODO: FILTER BY TYPE.
-      }
+      self.updateColors();
     });
-  dropdown.setValue("None");
+  typeFolder
+    .add(text, "ShowTypeI")
+    .name("Show Type I SNe")
+    .listen()
+    .onChange(function() {
+      self.updateColors();
+    });
+  typeFolder
+    .add(text, "ShowTypeII")
+    .name("Show Type II SNe")
+    .listen()
+    .onChange(function() {
+      self.updateColors();
+    });
+  typeFolder.open();
+
   gui.add(text, "Time", 1985, 2023).onChange(function() {
     //TODO: FILTER BY TIME.
   });
@@ -180,6 +203,56 @@ const ParticleSystem = function() {
     .onChange(function() {
       pLsstSystem.material.color.set(text.colorLsst);
     });
+
+  self.updateColors = function() {
+    var i; // iterator
+    console.log("Updating: ");
+    //console.log("ShowTypeI: " + text.ShowTypeI);
+    //console.log("ShowTypeII: " + text.ShowTypeII);
+    if (text.ShowOld) {
+      console.log("ShowOld: " + text.ShowOld);
+      console.log("ShowTypeIa: " + text.ShowTypeIa);
+      console.log("ShowTypeI: " + text.ShowTypeI);
+      console.log("ShowTypeII: " + text.ShowTypeII);
+      for (i = 0; i < oldData.length; i++) {
+        if (oldData[i].Type === "Ia" && text.ShowTypeIa) {
+          pOldSystem.geometry.colors[i].set(pColors[1]);
+        } else if (oldData[i].Type === "I" && text.ShowTypeI) {
+          pOldSystem.geometry.colors[i].set(pColors[3]);
+        } else if (oldData[i].Type === "II" && text.ShowTypeII) {
+          pOldSystem.geometry.colors[i].set(pColors[5]);
+        } else {
+          pOldSystem.geometry.colors[i].set("#000000");
+        }
+      }
+      pOldSystem.geometry.colorsNeedUpdate = true;
+    } else {
+      for (i = 0; i < oldData.length; i++) {
+        pOldSystem.geometry.colors[i].set("#000000");
+      }
+      pOldSystem.geometry.colorsNeedUpdate = true;
+    }
+    if (text.ShowLsst) {
+      console.log("ShowLsst: " + text.ShowLsst);
+      for (i = 0; i < lsstData.length; i++) {
+        if (lsstData[i].Type === "Ia" && text.ShowTypeIa) {
+          pLsstSystem.geometry.colors[i].set(pColors[0]);
+        } else if (lsstData[i].Type === "I" && text.ShowTypeI) {
+          pLsstSystem.geometry.colors[i].set(pColors[2]);
+        } else if (lsstData[i].Type === "II" && text.ShowTypeII) {
+          pLsstSystem.geometry.colors[i].set(pColors[4]);
+        } else {
+          pLsstSystem.geometry.colors[i].set("#000000");
+        }
+      }
+      pLsstSystem.geometry.colorsNeedUpdate = true;
+    } else {
+      for (i = 0; i < lsstData.length; i++) {
+        pLsstSystem.geometry.colors[i].set("#000000");
+      }
+      pLsstSystem.geometry.colorsNeedUpdate = true;
+    }
+  };
 
   // data loading function
   self.loadData = function() {
