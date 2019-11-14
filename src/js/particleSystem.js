@@ -18,6 +18,8 @@ var App = App || {};
 // Start of ParticleSystem function
 
 const ParticleSystem = function() {
+  const width = d3.select(".particleDiv").node().clientWidth;
+  const height = width / 2;
   // setup the pointer to the scope 'this' variable
   const self = this;
 
@@ -331,6 +333,96 @@ const ParticleSystem = function() {
     }
   };
 
+  // Draw Legend
+  self.drawLegend = function() {
+    var svg = d3.select("#legend");
+    svg.attr("background-color", "black");
+    svg
+      .append("circle")
+      .attr("cx", 20)
+      .attr("cy", 15)
+      .attr("r", 10)
+      .style("fill", pColors[0]);
+    svg
+      .append("text")
+      .attr("x", 40)
+      .attr("y", 15)
+      .text("Old Type Ia")
+      .style("font-size", "15px")
+      .style("fill", pColors[0])
+      .attr("alignment-baseline", "middle");
+    svg
+      .append("circle")
+      .attr("cx", 220)
+      .attr("cy", 15)
+      .attr("r", 10)
+      .style("fill", pColors[2]);
+    svg
+      .append("text")
+      .attr("x", 240)
+      .attr("y", 15)
+      .text("Old Type I")
+      .style("font-size", "15px")
+      .style("fill", pColors[2])
+      .attr("alignment-baseline", "middle");
+    svg
+      .append("circle")
+      .attr("cx", 420)
+      .attr("cy", 15)
+      .attr("r", 10)
+      .style("fill", pColors[4]);
+    svg
+      .append("text")
+      .attr("x", 440)
+      .attr("y", 15)
+      .text("Old Type II")
+      .style("font-size", "15px")
+      .style("fill", pColors[4])
+      .attr("alignment-baseline", "middle");
+    svg
+      .append("circle")
+      .attr("cx", 20)
+      .attr("cy", 36)
+      .attr("r", 10)
+      .style("fill", pColors[1]);
+    svg
+      .append("text")
+      .attr("x", 40)
+      .attr("y", 36)
+      .text("Lsst Type Ia")
+      .style("font-size", "15px")
+      .style("fill", pColors[1])
+      .attr("alignment-baseline", "middle");
+    svg
+      .append("circle")
+      .attr("cx", 220)
+      .attr("cy", 36)
+      .attr("r", 10)
+      .style("fill", pColors[3]);
+    svg
+      .append("text")
+      .attr("x", 240)
+      .attr("y", 36)
+      .text("LSST Type I")
+      .style("font-size", "15px")
+      .style("fill", pColors[3])
+      .attr("alignment-baseline", "middle");
+    svg
+      .append("circle")
+      .attr("cx", 420)
+      .attr("cy", 36)
+      .attr("r", 10)
+      .style("fill", pColors[5]);
+    svg
+      .append("text")
+      .attr("x", 440)
+      .attr("y", 36)
+      .text("LSST Type II")
+      .style("font-size", "15px")
+      .style("fill", pColors[5])
+      .attr("alignment-baseline", "middle");
+  };
+
   // data loading function
   self.loadData = function() {
     // read the old SNe csv file
@@ -390,6 +482,7 @@ const ParticleSystem = function() {
         self.updateColors(yearBounds);
         pOldSystem.geometry.colorsNeedUpdate = true;
         pLsstSystem.geometry.colorsNeedUpdate = true;
+        self.drawLegend();
       });
   };
 
