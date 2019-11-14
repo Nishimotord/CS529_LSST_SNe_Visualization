@@ -367,8 +367,6 @@ const ParticleSystem = function() {
       .get(function() {
         // create the particle system for old data
         self.createParticleSystem(oldData, "old");
-        self.updateColors(yearBounds);
-        pOldSystem.geometry.colorsNeedUpdate = true;
       });
 
     console.log("Loading Data: data/LSSTConverted.csv");
@@ -390,6 +388,7 @@ const ParticleSystem = function() {
         // create the particle system for lsst data
         self.createParticleSystem(lsstData, "lsst");
         self.updateColors(yearBounds);
+        pOldSystem.geometry.colorsNeedUpdate = true;
         pLsstSystem.geometry.colorsNeedUpdate = true;
       });
   };
