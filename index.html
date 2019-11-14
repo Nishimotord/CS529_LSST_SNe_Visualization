@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -35,30 +35,33 @@
   </head>
 
   <body onload="App.start();">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="particleDiv">
-          <div id="scene">
-            <div id="slider"></div>
+      <div class="container-fluid">
+          <div class="row">
+              <div class="particleDiv">
+                  <div id="scene">
+
+                      <div id="slider"></div>
+
+                  </div>
+              </div>
           </div>
-        </div>
+          <svg  width="1200" height="50">
+              <text id="DisplayCount" x="20" y="20"></text>
+          </svg>
+          <p>
+              This is a Visualization for the Adler Planetarium developed by graduate
+              students from UIC's Computer Science Department as part of a project for
+              the Visual Data Science course under Professor Marai showing the
+              Supernovae from
+              <a href="https://sne.space/">The Open Supernovae Catalog</a> and the
+              <a href="https://www.kaggle.com/michaelapers/the-plasticc-astronomy-starter-kit">
+                  "Photometric LSST Astronomical Time-series Classification Challenge"
+                  (PLAsTiCC)
+              </a>
+          </p>
+          <p>
+              L-Mouse: rotate, R-Mouse: pan, M-Mouse: zoom
+          </p>
       </div>
-      <p>
-        This is a Visualization for the Adler Planetarium developed by graduate
-        students from UIC's Computer Science Department as part of a project for
-        the Visual Data Science course under Professor Marai showing the
-        Supernovae from
-        <a href="https://sne.space/">The Open Supernovae Catalog</a> and the
-        <a
-          href="https://www.kaggle.com/michaelapers/the-plasticc-astronomy-starter-kit"
-        >
-          "Photometric LSST Astronomical Time-series Classification Challenge"
-          (PLAsTiCC)
-        </a>
-      </p>
-      <p>
-        L-Mouse: rotate, R-Mouse: pan, M-Mouse: zoom
-      </p>
-    </div>
   </body>
 </html>
