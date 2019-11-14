@@ -17,9 +17,13 @@
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js"></script>
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="lib/js/three.js"></script>
     <script src="lib/js/OrbitControls.js"></script>
     <script src="lib/js/dat.gui.min.js"></script>
+    <!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
+    <script src="https://unpkg.com/d3-simple-slider"></script>
 
     <!-- JS Source -->
     <script src="./src/js/scene.js"></script>
@@ -44,7 +48,9 @@
       </p>
       <div class="row">
         <div class="particleDiv">
-          <div id="scene"></div>
+          <div id="scene">
+            <div id="slider"></div>
+          </div>
         </div>
       </div>
     </div>

@@ -21,7 +21,7 @@ var App = App || {};
 */
 
 // size of particle (suggested: 0.01 - .1)
-var particleSize = 0.05;
+var particleSize = 1;
 
 var showAxis = true;
 // var showSNeV;
@@ -104,7 +104,8 @@ const ParticleSystem = function() {
     // Creates and adds two objects to the scene. One for each of the datasets.
     if(dsource == "old"){
       pOldMaterial = new THREE.PointsMaterial({
-        size: particleSize,
+        size: 1,
+        sizeAttenuation: false,
         vertexColors: THREE.VertexColors
       });
       pOldSystem = new THREE.Points(pGeometry, pOldMaterial);
@@ -124,15 +125,21 @@ const ParticleSystem = function() {
   var defaultGui = function() {
     this.ShowSNe = true;
     this.ShowLsst = true;
-    this.Type = [];
+    this.TypeI = false;
+    this.TypeIa = false;
+    this.TypeII = false;
     this.colorSNe = '#ffffff';
     this.colorLsst = '#0000ff';
     this.Time = 0;
+    this.Reset = function(){
+      location.reload();
+    };
   };
   
   // GUI related stuff.
   var text = new defaultGui();
   var gui = new dat.GUI();
+  // Data filtering
   var dataFolder = gui.addFolder('Data');
   dataFolder.add(text, 'ShowSNe').name('Show old SNe').listen().onChange(
     function(){
@@ -157,22 +164,100 @@ const ParticleSystem = function() {
         pLsstSystem.needsUpdate = true;
       }
     }
-  )
+  );
   dataFolder.open();
-  var dropdown = gui.add(text, 'Type', ['I', 'Ia', 'II', 'None']).onChange(
+  // Type filtering
+  var typeFolder = gui.addFolder('Type');
+  typeFolder.add(text, 'TypeI').name('Type I').listen().onChange(
     function(){
-      console.log(text.Type);
-      if(text.Type == 'None'){
-        // TODO: FILTER BY TYPE.
+      console.log('Type I' + text.TypeI);
+      if(text.TypeI){
+        typeview('I');
+        console.log("Done I");
+      }
+      else {
+        for (var i = 0; i < pOldSystem.geometry.vertices.length; i++) {
+          if (oldData[i].Type == 'I') {
+            pOldSystem.geometry.colors[i].set("#ffffff");
+          }
+          // else {
+          //   pOldSystem.geometry.colors[i].set("#000000");
+          // }
+        }
+        for(var i = 0; i < pLsstSystem.geometry.vertices.length; i++) {
+          if(lsstData[i].Type == 'I') {
+            pLsstSystem.geometry.colors[i].set("#0000ff");
+          }
+          // else {
+          //   pLsstSystem.geometry.colors[i].set("#000000");
+          // }
+        }
+        pOldSystem.geometry.colorsNeedUpdate = true;
+        pLsstSystem.geometry.colorsNeedUpdate = true;
+        console.log("unchecked I");
+      }
+    });
+  typeFolder.add(text, 'TypeIa').name('Type Ia').listen().onChange(
+    function(){
+      console.log('Type Ia:' + text.TypeIa);
+      if(text.TypeIa){
+        typeview('Ia');
+        console.log("Done Ia");
+      }
+      else {
+        for (var i = 0; i < pOldSystem.geometry.vertices.length; i++) {
+          if (oldData[i].Type == 'Ia') {
+            pOldSystem.geometry.colors[i].set("#ffffff");
+          }
+          // else {
+          //   pOldSystem.geometry.colors[i].set("#000000");
+          // }
+        }
+        for(var i = 0; i < pLsstSystem.geometry.vertices.length; i++) {
+          if(lsstData[i].Type == 'Ia') {
+            pLsstSystem.geometry.colors[i].set("#0000ff");
+          }
+          // else {
+          //   pLsstSystem.geometry.colors[i].set("#000000");
+          // }
+        }
+        pOldSystem.geometry.colorsNeedUpdate = true;
+        pLsstSystem.geometry.colorsNeedUpdate = true;
+        console.log("unchecked Ia");
       }
     }
   );
-  dropdown.setValue('None');
-  gui.add(text, 'Time', 1985, 2023).onChange(
+  typeFolder.add(text, 'TypeII').name('Type II').listen().onChange(
     function(){
-      //TODO: FILTER BY TIME.
+      console.log('Type II:' + text.TypeII);
+      if(text.TypeII){
+        typeview('II');
+        console.log("Done II");
+      }
+      else {
+        for (var i = 0; i < pOldSystem.geometry.vertices.length; i++) {
+          if (oldData[i].Type == 'II') {
+            pOldSystem.geometry.colors[i].set("#ffffff");
+          }
+          // else {
+          //   pOldSystem.geometry.colors[i].set("#000000");
+          // }
+        }
+        for(var i = 0; i < pLsstSystem.geometry.vertices.length; i++) {
+          if(lsstData[i].Type == 'II') {
+            pLsstSystem.geometry.colors[i].set("#0000ff");
+          }
+          // else {
+          //   pLsstSystem.geometry.colors[i].set("#000000");
+          // }
+        }
+        pOldSystem.geometry.colorsNeedUpdate = true;
+        pLsstSystem.geometry.colorsNeedUpdate = true;
+        console.log("unchecked I");
+      }
     }
   )
+  // Colour picker
   var colorFolder = gui.addFolder('Color');
   colorFolder.addColor(text, 'colorSNe').name('Old data color').onChange(
     function(){
@@ -182,9 +267,93 @@ const ParticleSystem = function() {
   );
   colorFolder.addColor(text, 'colorLsst').name('Lsst data color').onChange(
     function(){
+      console.log(text.colorLsst);
       pLsstSystem.material.color.set(text.colorLsst);
     }
   )
+
+  //reset function
+  gui.add(text, 'Reset');
+
+  function typeview(a) {
+    // reset();
+    for (var i = 0; i < pOldSystem.geometry.vertices.length; i++) {
+      if (oldData[i].Type == a) {
+        pOldSystem.geometry.colors[i].set("red");
+      }
+      else {
+        pOldSystem.geometry.colors[i].set("#000000");
+      }
+    }
+    for(var i = 0; i < pLsstSystem.geometry.vertices.length; i++) {
+      if(lsstData[i].Type == a) {
+        pLsstSystem.geometry.colors[i].set("red");
+      }
+      else {
+        pLsstSystem.geometry.colors[i].set("#000000");
+      }
+    }
+    pOldSystem.geometry.colorsNeedUpdate = true;
+    pLsstSystem.geometry.colorsNeedUpdate = true;
+  }
+
+  //Time slider
+  var sliderRange = d3
+    .sliderBottom()
+    .min(1985)
+    .max(2023)
+    .width(700)
+    .ticks(10)
+    .step(1)
+    .default([2000, 2001])
+    .fill('#2196f3')
+    .on('onchange', val => {
+      console.log(val[0] +','+ val[1]);
+      yearview(val[0], val[1]);
+      // TODO: Filter by time.
+    });
+
+  var gRange = d3
+    .select('div#slider')
+    .append('svg')
+    .attr('width', 1000)
+    .attr('height', 100)
+    .append('g')
+    .attr('transform', 'translate(30,30)');
+
+  gRange.call(sliderRange);
+
+  //FIlter by Time.
+  function yearview(startYear, endYear) {
+    var y= 0;
+    for (var i = 0; i < pOldSystem.geometry.vertices.length; i++) {
+        var x = oldData[i].T.split(".");
+     
+        if (x[0] >= startYear && x[0] <= endYear) {
+            pOldSystem.geometry.colors[i].set("yellow");
+            y++;
+        }
+        else {
+            pOldSystem.geometry.colors[i].set("#000000");
+        }
+      }
+    for (var i = 0; i < pLsstSystem.geometry.vertices.length; i++) {
+      var x = lsstData[i].T.split(".");
+   
+      if (x[0] >= startYear && x[0] <= endYear) {
+          pLsstSystem.geometry.colors[i].set("white");
+          y++;
+      }
+      else {
+          pLsstSystem.geometry.colors[i].set("#000000");
+      }
+    }
+    pOldSystem.geometry.colorsNeedUpdate = true;
+    pLsstSystem.geometry.colorsNeedUpdate =  true;
+    console.log("Done time filter");
+    console.log(y);
+
+}
 
   // data loading function
   self.loadData = function() {
@@ -194,7 +363,7 @@ const ParticleSystem = function() {
       // iterate over the rows of the csv file
       .row(function(d) {
         // get the min bounds
-        bounds.minX = Math.min(bounds.minX || Infinity, d.Points0);
+        bounds.minX = Math.min(bounds.minX || Infinity, d.x);
         bounds.minY = Math.min(bounds.minY || Infinity, d.Points1);
         bounds.minZ = Math.min(bounds.minZ || Infinity, d.Points2);
 
@@ -213,7 +382,7 @@ const ParticleSystem = function() {
           Y: Number(d.y),
           Z: Number(d.z),
           // Time
-          T: Number(d.t),
+          T: String(d.t),
           // Luminosity
           L: Number(d.log10lum)
         });
@@ -235,7 +404,7 @@ const ParticleSystem = function() {
           Y: Number(d.y),
           Z: Number(d.z),
           // Time
-          T: Number(d.t)
+          T: String(d.t)
         });
       })
       // when done loading
