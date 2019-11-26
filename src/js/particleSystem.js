@@ -21,8 +21,8 @@ const ParticleSystem = function() {
   // setup the pointer to the scope 'this' variable
   const self = this;
 
-  var numOld;
-  var numLsst;
+  var numOld, numOldI, numOldII, numOldIa;
+  var numLsst, numLsstI, numLsstII, numLsstIa;
 
   // Stores index start of BufferGeometry where type changes, ordered as:
   // (old) I, II, Ia, (lsst) I, II, Ia
@@ -254,6 +254,15 @@ const ParticleSystem = function() {
     pBufferGeometry.getAttribute("size").needsUpdate = true;
     pBufferGeometry.getAttribute("time").needsUpdate = true;
     sceneObject.add(pSystem);
+
+    numOldIa = typeIndex[3] - typeIndex[2];
+    numOldI = typeIndex[1] - 1;
+    numOldII = typeIndex[2] - typeIndex[1];
+    numLsstIa = numLsst - typeIndex[5];
+    numLsstI = typeIndex[4] - typeIndex[3];
+    numLsstII = typeIndex[5] - typeIndex[3];
+
+    $("#DisplayCount").text("Old SNe : " + numOld + " LSST : " + numLsst);
   };
 
   // Various options for GUI.
@@ -555,21 +564,27 @@ const ParticleSystem = function() {
     );
     $("#DisplayCount").text(
       "Old SNe : " +
-        OldSNeCount +
+        numOld +
         " Type Ia : " +
-        OldTypeIaCount +
+        typeIndex[3] -
+        typeIndex[2] +
         " Type I : " +
-        OldTypeICount +
+        typeIndex[1] -
+        1 +
         " Type II : " +
-        OldTypeIICount +
+        typeIndex[2] -
+        typeIndex[1] +
         " LSST : " +
-        LSSTCount +
+        numLsst +
         " Type Ia : " +
-        LSSTTypeIaCount +
+        typeIndex[3] -
+        typeIndex[2] +
         " Type I : " +
-        LSSTTypeICount +
+        typeIndex[1] -
+        1 +
         " Type II : " +
-        LSSTTypeIICount
+        typeIndex[2] -
+        typeIndex[1]
     );
   };
 
@@ -587,7 +602,7 @@ const ParticleSystem = function() {
       .append("text")
       .attr("x", 40)
       .attr("y", 15)
-      .text("Old Type Ia")
+      .text("Old Type Ia - " + numOldIa)
       .style("font-size", "15px")
       .style("fill", pColors[0])
       .attr("alignment-baseline", "middle");
@@ -601,7 +616,7 @@ const ParticleSystem = function() {
       .append("text")
       .attr("x", 240)
       .attr("y", 15)
-      .text("Old Type I")
+      .text("Old Type I - " + numOldI)
       .style("font-size", "15px")
       .style("fill", pColors[2])
       .attr("alignment-baseline", "middle");
@@ -615,7 +630,7 @@ const ParticleSystem = function() {
       .append("text")
       .attr("x", 440)
       .attr("y", 15)
-      .text("Old Type II")
+      .text("Old Type II - " + numOldII)
       .style("font-size", "15px")
       .style("fill", pColors[4])
       .attr("alignment-baseline", "middle");
@@ -629,7 +644,7 @@ const ParticleSystem = function() {
       .append("text")
       .attr("x", 40)
       .attr("y", 36)
-      .text("Lsst Type Ia")
+      .text("Lsst Type Ia - " + numLsstIa)
       .style("font-size", "15px")
       .style("fill", pColors[1])
       .attr("alignment-baseline", "middle");
@@ -643,7 +658,7 @@ const ParticleSystem = function() {
       .append("text")
       .attr("x", 240)
       .attr("y", 36)
-      .text("LSST Type I")
+      .text("LSST Type I - " + numLsstI)
       .style("font-size", "15px")
       .style("fill", pColors[3])
       .attr("alignment-baseline", "middle");
@@ -657,7 +672,7 @@ const ParticleSystem = function() {
       .append("text")
       .attr("x", 440)
       .attr("y", 36)
-      .text("LSST Type II")
+      .text("LSST Type II - " + numLsstII)
       .style("font-size", "15px")
       .style("fill", pColors[5])
       .attr("alignment-baseline", "middle");
