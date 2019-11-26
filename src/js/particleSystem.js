@@ -358,11 +358,6 @@ const ParticleSystem = function() {
     });
   typeFolder.open();
 
-  gui.add(text, "Time", 1885, 2025).onChange(function(val) {
-    yearBounds[1] = Math.floor(val);
-    console.log("upper bound set: " + yearBounds[1]);
-    self.updateColors(yearBounds);
-  });
   gui.add(text, "oldSize", 1, 30).onChange(function(val) {
     pSizes[typeMaterial.Old] = val;
     pSystem.material[typeMaterial.Old].size = val;
@@ -397,10 +392,15 @@ const ParticleSystem = function() {
   });
   */
   gui.add(text, "blending").onChange(function(val) {
-    pSystem.material.blending = val
+    pMaterials[0].blending = val
       ? THREE.AdditiveBlending
       : THREE.NormalBlending;
-    pSystem.material.needsUpdate = true;
+
+    pMaterials[1].blending = val
+      ? THREE.AdditiveBlending
+      : THREE.NormalBlending;
+    pMaterials[0].needsUpdate = true;
+    pMaterials[1].needsUpdate = true;
   });
 
   self.updateTypeView = function(typeIndex, typeMaterialID, show) {
