@@ -397,7 +397,10 @@ const ParticleSystem = function() {
   });
   */
   gui.add(text, "blending").onChange(function(val) {
-    pSystem.material.blending = val
+    pSystem.material[0].blending = val
+      ? THREE.AdditiveBlending
+      : THREE.NormalBlending;
+    pSystem.material[1].blending = val
       ? THREE.AdditiveBlending
       : THREE.NormalBlending;
     pSystem.material.needsUpdate = true;
