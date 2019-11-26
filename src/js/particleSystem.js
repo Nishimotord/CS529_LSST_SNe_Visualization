@@ -27,11 +27,21 @@ const ParticleSystem = function() {
   // Stores index start of BufferGeometry where type changes, ordered as:
   // (old) I, II, Ia, (lsst) I, II, Ia
   var typeIndex = [];
+  var typeData = {
+    OldI: 0,
+    OldII: 1,
+    OldIa: 2,
+    LsstI: 3,
+    LsstII: 4,
+    LsstIa: 5
+  };
+  var typeMaterial = { Old: 0, Lsst: 1, Hidden: 2 };
+
+  var useSprite = true;
 
   // size of particle (suggested: 0.01 - .1)
-  var pSizes = [10, 20];
+  var pSizes = [20, 10];
   var useSizeAttenuation = false;
-  var useSprite = true;
 
   var showAxis = true;
 
@@ -52,9 +62,9 @@ const ParticleSystem = function() {
   // Variables for geometry, materials, objects.
   var pBufferGeometry;
   var pGeometry;
-  var particle;
-  // array of materials
   var pMaterials;
+  var particle;
+
   var pSystem;
   var blending = THREE.NormalBlending;
 
@@ -137,6 +147,9 @@ const ParticleSystem = function() {
       // Assign Times
       times[i] = data[i].T;
     }
+
+    console.log(typeIndex);
+    console.log(snData.length);
     pBufferGeometry.addAttribute(
       "position",
       new THREE.BufferAttribute(positions, 3)
@@ -145,10 +158,35 @@ const ParticleSystem = function() {
     pBufferGeometry.addAttribute("size", new THREE.BufferAttribute(sizes, 1));
     pBufferGeometry.addAttribute("time", new THREE.BufferAttribute(times, 1));
     pMaterials = [
+      /*
+      // base material for basic pixel representation
       new THREE.PointsMaterial({
         size: pSizes[0],
         sizeAttenuation: useSizeAttenuation,
         vertexColors: THREE.VertexColors
+      }),
+
+      // base material for basic sprite representation
+      new THREE.PointsMaterial({
+        size: pSizes[0],
+        sizeAttenuation: useSizeAttenuation,
+        vertexColors: THREE.VertexColors,
+        blending: blending,
+        alphaTest: 0.5,
+        //depthWrite: false,  // looks weird?...
+        map: sprite,
+        transparent: true //or false?
+      }),
+      */
+      new THREE.PointsMaterial({
+        size: pSizes[0],
+        sizeAttenuation: useSizeAttenuation,
+        vertexColors: THREE.VertexColors,
+        blending: blending,
+        alphaTest: 0.5,
+        //depthWrite: false,  // looks weird?...
+        map: sprite,
+        transparent: true //or false?
       }),
       new THREE.PointsMaterial({
         size: pSizes[1],
@@ -161,16 +199,46 @@ const ParticleSystem = function() {
         transparent: true //or false?
       }),
       new THREE.PointsMaterial({
-        transparent: true,
+        sizeAttenuation: useSizeAttenuation,
+        vertexColors: THREE.VertexColors,
+        blending: blending,
+        alphaTest: 0.5,
+        //depthWrite: false,  // looks weird?...
+        map: sprite,
+        transparent: true, //or false?
         opacity: 0.0
       })
     ];
-    pBufferGeometry.addGroup(typeIndex[0], typeIndex[1] - typeIndex[0], 0);
-    pBufferGeometry.addGroup(typeIndex[1], typeIndex[2] - typeIndex[1], 0);
-    pBufferGeometry.addGroup(typeIndex[2], typeIndex[3] - typeIndex[2], 0);
-    pBufferGeometry.addGroup(typeIndex[3], typeIndex[4] - typeIndex[3], 0);
-    pBufferGeometry.addGroup(typeIndex[4], typeIndex[5] - typeIndex[4], 0);
-    pBufferGeometry.addGroup(typeIndex[5], snData.length - typeIndex[5], 0);
+    pBufferGeometry.addGroup(
+      typeIndex[0],
+      typeIndex[1] - typeIndex[0],
+      typeMaterial.Old
+    );
+    pBufferGeometry.addGroup(
+      typeIndex[1],
+      typeIndex[2] - typeIndex[1],
+      typeMaterial.Old
+    );
+    pBufferGeometry.addGroup(
+      typeIndex[2],
+      typeIndex[3] - typeIndex[2],
+      typeMaterial.Old
+    );
+    pBufferGeometry.addGroup(
+      typeIndex[3],
+      typeIndex[4] - typeIndex[3],
+      typeMaterial.Lsst
+    );
+    pBufferGeometry.addGroup(
+      typeIndex[4],
+      typeIndex[5] - typeIndex[4],
+      typeMaterial.Lsst
+    );
+    pBufferGeometry.addGroup(
+      typeIndex[5],
+      snData.length - typeIndex[5],
+      typeMaterial.Lsst
+    );
 
     pSystem = new THREE.Points(pBufferGeometry, pMaterials);
     pSystem.sortParticles = true;
@@ -197,14 +265,13 @@ const ParticleSystem = function() {
     this.ShowTypeII = true;
     this.Type = [];
     this.Time = 2025;
-    this.oldSize = pSizes[1];
-    this.lsstSize = pSizes[0];
+    this.oldSize = pSizes[typeMaterial.Old];
+    this.lsstSize = pSizes[typeMaterial.Lsst];
     this.Reset = function() {
       location.reload();
     };
     this.attenuation = useSizeAttenuation;
-    this.sprite = useSprite;
-    this.alphaTest = 0.5;
+    //this.sprite = useSprite;
     this.blending = blending === THREE.AdditiveBlending;
   };
 
@@ -217,14 +284,30 @@ const ParticleSystem = function() {
     .name("Show old SNe")
     .listen()
     .onChange(function(val) {
-      self.updateTypeView(0, val);
+      if (text.ShowTypeI) {
+        self.updateTypeView(typeData.OldI, typeMaterial.Old, val);
+      }
+      if (text.ShowTypeII) {
+        self.updateTypeView(typeData.OldII, typeMaterial.Old, val);
+      }
+      if (text.ShowTypeIa) {
+        self.updateTypeView(typeData.OldIa, typeMaterial.Old, val);
+      }
     });
   dataFolder
     .add(text, "ShowLsst")
     .name("Show LSST SNe")
     .listen()
     .onChange(function(val) {
-      self.updateTypeView(1, val);
+      if (text.ShowTypeI) {
+        self.updateTypeView(typeData.LsstI, typeMaterial.Lsst, val);
+      }
+      if (text.ShowTypeII) {
+        self.updateTypeView(typeData.LsstII, typeMaterial.Lsst, val);
+      }
+      if (text.ShowTypeIa) {
+        self.updateTypeView(typeData.LsstIa, typeMaterial.Lsst, val);
+      }
     });
   dataFolder.open();
   var typeFolder = gui.addFolder("SNe Type");
@@ -233,11 +316,11 @@ const ParticleSystem = function() {
     .name("Show Type Ia SNe")
     .listen()
     .onChange(function(val) {
-      if (text.showOld) {
-        self.updateTypeView(2, val);
+      if (text.ShowOld) {
+        self.updateTypeView(typeData.OldIa, typeMaterial.Old, val);
       }
       if (text.ShowLsst) {
-        self.updateTypeView(5, val);
+        self.updateTypeView(typeData.LsstIa, typeMaterial.Lsst, val);
       }
     });
   typeFolder
@@ -245,11 +328,11 @@ const ParticleSystem = function() {
     .name("Show Type I SNe")
     .listen()
     .onChange(function(val) {
-      if (text.showOld) {
-        self.updateTypeView(0, val);
+      if (text.ShowOld) {
+        self.updateTypeView(typeData.OldI, typeMaterial.Old, val);
       }
       if (text.ShowLsst) {
-        self.updateTypeView(3, val);
+        self.updateTypeView(typeData.LsstI, typeMaterial.Lsst, val);
       }
     });
   typeFolder
@@ -257,11 +340,11 @@ const ParticleSystem = function() {
     .name("Show Type II SNe")
     .listen()
     .onChange(function(val) {
-      if (text.showOld) {
-        self.updateTypeView(1, val);
+      if (text.ShowOld) {
+        self.updateTypeView(typeData.OldII, typeMaterial.Old, val);
       }
       if (text.ShowLsst) {
-        self.updateTypeView(4, val);
+        self.updateTypeView(typeData.LsstII, typeMaterial.Lsst, val);
       }
     });
   typeFolder.open();
@@ -272,28 +355,38 @@ const ParticleSystem = function() {
     self.updateColors(yearBounds);
   });
   gui.add(text, "oldSize", 1, 30).onChange(function(val) {
-    pSizes[1] = val;
-    pSystem.material[0].size = val;
-    pSystem.material[0].needsUpdate = true;
+    pSizes[typeMaterial.Old] = val;
+    pSystem.material[typeMaterial.Old].size = val;
+    pSystem.material[typeMaterial.Old].needsUpdate = true;
   });
   gui.add(text, "lsstSize", 1, 30).onChange(function(val) {
+    pSizes[typeMaterial.Lsst] = val;
+    pSystem.material[typeMaterial.Lsst].size = val;
+    pSystem.material[typeMaterial.Lsst].needsUpdate = true;
     //lsstPSize = val;
     //pSystem.material.size = lsstPSize;
   });
   gui.add(text, "attenuation").onChange(function(val) {
     useSizeAttenuation = val;
-    pSystem.material.sizeAttenuation = useSizeAttenuation;
-    pSystem.material.needsUpdate = true;
+    pSystem.material[typeMaterial.Old].sizeAttenuation = useSizeAttenuation;
+    pSystem.material[typeMaterial.Lsst].sizeAttenuation = useSizeAttenuation;
+    pSystem.material[typeMaterial.Old].needsUpdate = true;
+    pSystem.material[typeMaterial.Lsst].needsUpdate = true;
   });
+  /*
   gui.add(text, "sprite").onChange(function(val) {
     useSprite = val;
-    pSystem.material = val ? pMaterials[1] : pMaterials[0];
-    pSystem.material.needsUpdate = true;
+    for (var i = 0; i < typeData.length; i++) {
+      pBufferGeometry.groups[i].materialIndex =
+        pBufferGeometry.groups[i].materialIndex === typeMaterial.Hidden
+          ? typeMaterial.Hidden
+          : useSprite
+          ? typeMaterial.Sprite
+          : typeMaterial.Pixel;
+      pBufferGeometry.groups[i].needsUpdate = true;
+    }
   });
-  gui.add(text, "alphaTest", 0, 1).onChange(function(val) {
-    pSystem.material.alphaTest = val;
-    pSystem.material.needsUpdate = true;
-  });
+  */
   gui.add(text, "blending").onChange(function(val) {
     pSystem.material.blending = val
       ? THREE.AdditiveBlending
@@ -301,9 +394,11 @@ const ParticleSystem = function() {
     pSystem.material.needsUpdate = true;
   });
 
-  self.updateTypeView = function(typeIndex, toggle) {
-    console.log("toggling group: " + typeIndex + " " + toggle);
-    pBufferGeometry.groups[typeIndex].materialIndex = toggle ? 0 : 2;
+  self.updateTypeView = function(typeIndex, typeMaterialID, show) {
+    console.log("toggling group: " + typeIndex + " " + show);
+    pBufferGeometry.groups[typeIndex].materialIndex = show
+      ? typeMaterialID
+      : typeMaterial.Hidden;
     pBufferGeometry.groups[typeIndex].needsUpdate = true;
   };
 
