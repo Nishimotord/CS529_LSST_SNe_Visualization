@@ -324,6 +324,13 @@ const ParticleSystem = function() {
   // Draw Legend
   self.drawLegend = function() {
     $("#DisplayCount").text("Old SNe : " + numOld + " LSST : " + numLsst);
+
+    d3.select("#legend")
+      .selectAll("text")
+      .remove();
+    d3.select("#legend")
+      .selectAll("circle")
+      .remove();
     var svg = d3.select("#legend");
     svg.attr("background-color", "black");
     svg
@@ -437,6 +444,41 @@ const ParticleSystem = function() {
       for (var i = 0; i < pBufferGeometry.groups.length; i++) {
         pBufferGeometry.groups[i].needsUpdate = true;
       }
+      // recount SNe variables
+      numOld = numOldI = numOldII = numOldIa = numLsst = numLsstI = numLsstII = numLsstIa = 0;
+      for (var i = 0; i < snData.length; i++) {
+        if (snData[i].T >= yearBounds[0] && snData[i].T <= yearBounds[1]) {
+          if (snData[i].Source === "Old") {
+            numOld++;
+            if (snData[i].Type === "I") {
+              numOldI++;
+            }
+            if (snData[i].Type === "II") {
+              numOldII++;
+            }
+            if (snData[i].Type === "Ia") {
+              numOldIa++;
+            }
+          } else if (snData[i].Source === "LSST") {
+            numLsst++;
+
+            if (snData[i].Type === "I") {
+              numLsstI++;
+            }
+
+            if (snData[i].Type === "II") {
+              numLsstII++;
+            }
+
+            if (snData[i].Type === "Ia") {
+              numLsstIa++;
+            }
+          }
+        }
+      }
+      console.log(numOld);
+      console.log(numLsst);
+      self.drawLegend();
     }
   };
   // data loading function
