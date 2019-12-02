@@ -1,18 +1,16 @@
 ﻿<!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8" />
 
     <title>
-      Visualizing Supernovae from The Open Supernova Catalog and Large Synoptic
-      Survey Telescope
+        Visualizing Supernovae from The Open Supernova Catalog and Large Synoptic
+        Survey Telescope
     </title>
 
     <!-- CSS Libraries -->
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-    />
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <!-- CSS Source -->
     <link rel="stylesheet" href="./src/css/main.css" />
 
@@ -32,24 +30,50 @@
     <script src="./src/js/scene.js"></script>
     <script src="./src/js/particleSystem.js"></script>
     <script src="./src/js/main.js"></script>
-  </head>
 
-  <body onload="App.start();">
+    <link rel="stylesheet" href="./src/css/welcomeScreen.css">
+    <style>
+
+        #help {
+            background-color: transparent;
+            background-repeat: no-repeat;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            outline: none;
+            float: right;
+        }
+    </style>
+</head>
+
+<body onload="App.start();">
     <div class="container-fluid">
-      <div class="row">
-        <div class="particleDiv">
-          <div id="scene">
-            <div id="slider"></div>
-          </div>
+        <div id="boxes">
+            <div style="top: 50%; left: 50%; display: none;" id="dialog" class="window">
+                <div id="san">
+                    <a href="#" class="close agree"><img src="./src/js/close2.png" width="25" style="float:right; margin-right: -25px; margin-top: -30px;"></a>
+                    <h1> SNe Visualization </h1>
+                    <p></p>
+                </div>
+            </div>
+            <div style="width: 1000px; font-size: 32pt; color:greenyellow; height: 1202px; display: none; opacity: 0.4;" id="mask"></div>
         </div>
-      </div>
-      <svg
-        id="legend"
-        height="60"
-        width="1500"
-        style="stroke-width: 0px;background-color: white"
-      ></svg>
-      <text id="DisplayCount" x="600" y="20"></text>
+        <div class="row">
+            <div class="particleDiv">
+                <div id="scene">
+                    <div id="slider"></div>
+                </div>
+            </div>
+        </div>
+        <div >
+            <button id="help"> <img src="./src/js/questionMark.png" width="25"></button>
+        </div>
+
+        <svg id="legend"
+             height="60"
+             width="1500"
+             style="stroke-width: 0px;background-color: white"></svg>
+        <text id="DisplayCount" x="600" y="20"></text>
     </div>
-  </body>
+</body>
 </html>

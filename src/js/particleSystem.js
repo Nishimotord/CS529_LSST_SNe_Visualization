@@ -79,7 +79,7 @@ const ParticleSystem = function() {
   var sprite = new THREE.TextureLoader().load(
     "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/sprites/spark1.png"
     //"imgs/particle.png"
-  );
+    );
 
   var pColors = [
     "#66c2a5",
@@ -96,8 +96,36 @@ const ParticleSystem = function() {
     new THREE.Color("rgb(231,138,195)"),
     new THREE.Color("rgb(166,216,84)"),
     new THREE.Color("rgb(255,217,47)")
-  ];
+    ];
 
+    document.getElementById("help").addEventListener("click", readyFn);
+    function readyFn() {
+        // Code to run when the document is ready.
+
+        var id = '#dialog';
+        var maskHeight = $(document).height();
+        var maskWidth = $(window).width();
+        $('#mask').css({ 'width': maskWidth, 'height': maskHeight });
+        $('#mask').fadeIn(500);
+        $('#mask').fadeTo("slow", 0.9);
+        var winH = $(window).height();
+        var winW = $(window).width();
+        $(id).css('top', winH / 2 - $(id).height() / 2);
+        $(id).css('left', winW / 2 - $(id).width() / 2);
+        $(id).fadeIn(500);
+        $('.window .close').click(function (e) {
+            e.preventDefault();
+            $('#mask').hide();
+            $('.window').hide();
+        });
+        $('#mask').click(function () {
+            $(this).hide();
+            $('.window').hide();
+        });
+
+    }
+
+    $(document).ready(readyFn);
   // creates the particle system
   self.createParticleSystem = function(data) {
     pGeometry = new THREE.Geometry();
