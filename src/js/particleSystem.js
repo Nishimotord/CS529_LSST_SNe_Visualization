@@ -55,7 +55,6 @@ const ParticleSystem = function () {
   var snData = [];
   const oldData = [];
   const lsstData = [];
-  // const sneCountData = [];
 
   // scene graph group for the particle system
   const sceneObject = new THREE.Group();
@@ -673,20 +672,6 @@ const ParticleSystem = function () {
         //pSystem.geometry.colorsNeedUpdate = true;
         //pSystem.geometry.colorsNeedUpdate = true;
       });
-    // d3.csv("data/sneCount.csv")
-    //   .row(function(d) {
-    //     sneCountData.push({
-    //       Date: Date(d.date),
-    //       CountI: Number(d.I),
-    //       CountIa: Number(d.Ia),
-    //       CountII: Number(d.II)
-    //     });
-    //   })
-    //   //when done loading
-    //   .get(function() {
-    //     self.createTimeline(sneCountData);
-    //   })
-
   };
 
   // publicly available functions
