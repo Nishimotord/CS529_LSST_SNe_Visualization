@@ -21,16 +21,38 @@ const ParticleSystem = function () {
   // setup the pointer to the scope 'this' variable
   const self = this;
 
+  var numOld = 0,
+    numOldI = 0,
+    numOldII = 0,
+    numOldIa = 0;
+  var numLsst = 0,
+    numLsstI = 0,
+    numLsstII = 0,
+    numLsstIa = 0;
+
+  // Stores index start of BufferGeometry where type changes, ordered as:
+  // (old) I, II, Ia, (lsst) I, II, Ia
+  var typeIndex = [];
+  var typeData = {
+    OldI: 0,
+    OldII: 1,
+    OldIa: 2,
+    LsstI: 3,
+    LsstII: 4,
+    LsstIa: 5
+  };
+
+  // particle-related settings
+  var typeMaterial = { Show: 0, Hidden: 1 };
   // size of particle (suggested: 0.01 - .1)
-  var oldPSize = 3;
-  var lsstPSize = 1;
+  var pSizes = [5, 10];
   var useSizeAttenuation = false;
-
-  var showAxis = true;
-
-  var isOld = false;
+  var useSprite = true;
+  var blending = THREE.NormalBlending;
+  var unselectedOpacity = 0.1;
 
   // data containers
+  var snData = [];
   const oldData = [];
   const lsstData = [];
   // const sneCountData = [];
@@ -41,22 +63,36 @@ const ParticleSystem = function () {
   // bounds of the data
   var bounds = {};
   var yearBounds = [1885, 2025];
+  var yearIndex = [0, 0];
+  var yearIndexes = [];
 
   // Variables for geometry, materials, objects.
-  var pGeometry;
-  var particle;
-  var pOldMaterial;
-  var pOldSystem;
-  var pLsstMaterial;
-  var pLsstSystem;
+  var pBufferGeometry;
+  var pMaterials;
+  var pSystem;
+
+  var spriteTexture = new THREE.TextureLoader().load(
+    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/sprites/spark1.png"
+    //"imgs/particle.png"
+  );
+
+  var sprite = spriteTexture;
 
   var pColors = [
-    "#a6cee3",
-    "#1f78b4",
-    "#b2df8a",
-    "#33a02c",
-    "#fb9a99",
-    "#e31a1c"
+    "#66c2a5",
+    "#fc8d62",
+    "#8da0cb",
+    "#e78ac3",
+    "#a6d854",
+    "#ffd92f"
+  ];
+  var pColorsRGB = [
+    new THREE.Color("rgb(102,194,165)"),
+    new THREE.Color("rgb(252,141,98)"),
+    new THREE.Color("rgb(141,160,203)"),
+    new THREE.Color("rgb(231,138,195)"),
+    new THREE.Color("rgb(166,216,84)"),
+    new THREE.Color("rgb(255,217,47)")
   ];
   var margin = { top: 20, right: 30, bottom: 30, left: 60 },
     width = 900 - margin.left - margin.right,
@@ -185,76 +221,154 @@ const ParticleSystem = function () {
 
       }
   });
-  
-  // Create an x,y,z axis (r,g,b)
-  self.drawAxis = function () {
-    // create axis lines (x,y,z, - r,g,b)
-    const xAxisMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
-    const yAxisMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-    const zAxisMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
 
-    // BufferGeometry is more performance-friendly than just Geometry..use Geometry for simplicity
-    const xAxisGeometry = new THREE.Geometry();
-    const yAxisGeometry = new THREE.Geometry();
-    const zAxisGeometry = new THREE.Geometry();
-    xAxisGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-    xAxisGeometry.vertices.push(new THREE.Vector3(15000, 0, 0));
-    yAxisGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-    yAxisGeometry.vertices.push(new THREE.Vector3(0, 15000, 0));
-    zAxisGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-    zAxisGeometry.vertices.push(new THREE.Vector3(0, 0, 15000));
+  document.getElementById("help").addEventListener("click", readyFn);
+  function readyFn() {
+    // Code to run when the document is ready.
 
-    const xAxisLine = new THREE.Line(xAxisGeometry, xAxisMaterial);
-    const yAxisLine = new THREE.Line(yAxisGeometry, yAxisMaterial);
-    const zAxisLine = new THREE.Line(zAxisGeometry, zAxisMaterial);
-    sceneObject.add(xAxisLine);
-    sceneObject.add(yAxisLine);
-    sceneObject.add(zAxisLine);
-  };
+    var id = "#dialog";
+    var maskHeight = $(document).height();
+    var maskWidth = $(window).width();
+    $("#mask").css({ width: maskWidth, height: maskHeight });
+    $("#mask").fadeIn(500);
+    $("#mask").fadeTo("slow", 0.9);
+    var winH = $(window).height();
+    var winW = $(window).width();
+    $(id).css("top", winH / 2 - $(id).height() / 2);
+    $(id).css("left", winW / 2 - $(id).width() / 2);
+    $(id).fadeIn(500);
+    $(".window .close").click(function(e) {
+      e.preventDefault();
+      $("#mask").hide();
+      $(".window").hide();
+    });
+    $("#mask").click(function() {
+      $(this).hide();
+      $(".window").hide();
+    });
+  }
 
+  $(document).ready(readyFn);
   // creates the particle system
-  self.createParticleSystem = function (data, dsource) {
-    // console.log(data)
-    console.log(dsource + ": " + data.length);
-    // use self.data to create the particle system
-    // draw your particle system here!
-    pGeometry = new THREE.Geometry();
-    for (var i = 0; i < data.length; i++) {
-      // particle data in cartesian coordinates of units Mpc
-      if (data[i].X == 0 && data[i].Y == 0 && data[i].Z == 0) {
-        console.log("ZEROED");
-      } else {
-        particle = new THREE.Vector3(data[i].X, data[i].Y, data[i].Z);
-        pGeometry.vertices.push(particle);
+  self.createParticleSystem = function(data) {
+    pBufferGeometry = new THREE.BufferGeometry();
+    var positions = new Float32Array(data.length * 3);
+    var colors = new Float32Array(data.length * 3);
+    // hold current type
+    var t;
+    // hold current year
+    var currY = data[0].T;
+    var currYIndex = 0;
+    for (var i = 0, i3 = 0; i < data.length; i++, i3 += 3) {
+      // build yearIndexes after counting them
 
-        // default to white
-        if (dsource == "old") {
-          var color = new THREE.Color(0xffffff);
-          pGeometry.colors.push(color);
-        } else if (dsource == "lsst") {
-          var color = new THREE.Color(0xffffff);
-          pGeometry.colors.push(color);
+      if (i + 1 == data.length) {
+        yearIndexes[data[data.length - 1].T.toString()] = [currYIndex, i];
+      }
+
+      if (currY != data[i].T) {
+        yearIndexes[currY.toString()] = [currYIndex, i - 1];
+        currY = data[i].T;
+        currYIndex = i;
+        console.log(currY + " starts at " + i);
+        // be sure to make last entry
+      }
+      if (t !== data[i].Type) {
+        t = data[i].Type;
+        //console.log(t + " at " + i + " for " + data[i].Source);
+        typeIndex.push(i);
+      }
+      // Assign Positions
+      positions[i3 + 0] = data[i].X;
+      positions[i3 + 1] = data[i].Y;
+      positions[i3 + 2] = data[i].Z;
+      // Assign Colors
+      if (data[i].Source === "Old") {
+        if (data[i].Type === "Ia") {
+          numOldIa++;
+          colors[i3 + 0] = pColorsRGB[0].r;
+          colors[i3 + 1] = pColorsRGB[0].g;
+          colors[i3 + 2] = pColorsRGB[0].b;
+        } else if (data[i].Type === "I") {
+          numOldI++;
+          colors[i3 + 0] = pColorsRGB[2].r;
+          colors[i3 + 1] = pColorsRGB[2].g;
+          colors[i3 + 2] = pColorsRGB[2].b;
+        } else if (data[i].Type === "II") {
+          numOldII++;
+          colors[i3 + 0] = pColorsRGB[4].r;
+          colors[i3 + 1] = pColorsRGB[4].g;
+          colors[i3 + 2] = pColorsRGB[4].b;
+        }
+      } else {
+        // Source === "LSST"
+        if (data[i].Type === "Ia") {
+          numLsstIa++;
+          colors[i3 + 0] = pColorsRGB[1].r;
+          colors[i3 + 1] = pColorsRGB[1].g;
+          colors[i3 + 2] = pColorsRGB[1].b;
+        } else if (data[i].Type === "I") {
+          numLsstI++;
+          colors[i3 + 0] = pColorsRGB[3].r;
+          colors[i3 + 1] = pColorsRGB[3].g;
+          colors[i3 + 2] = pColorsRGB[3].b;
+        } else if (data[i].Type === "II") {
+          numLsstII++;
+          colors[i3 + 0] = pColorsRGB[5].r;
+          colors[i3 + 1] = pColorsRGB[5].g;
+          colors[i3 + 2] = pColorsRGB[5].b;
         }
       }
     }
-    // Creates and adds two objects to the scene. One for each of the datasets.
-    if (dsource == "old") {
-      pOldMaterial = new THREE.PointsMaterial({
-        size: oldPSize,
+
+    //console.log(typeIndex);
+    console.log(snData.length);
+    console.log(yearIndexes);
+    pBufferGeometry.addAttribute(
+      "position",
+      new THREE.BufferAttribute(positions, 3)
+    );
+    pBufferGeometry.addAttribute("color", new THREE.BufferAttribute(colors, 3));
+    pMaterials = [
+      // Selected SNe Material
+      new THREE.PointsMaterial({
+        size: pSizes[0],
         sizeAttenuation: useSizeAttenuation,
-        vertexColors: THREE.VertexColors
-      });
-      pOldSystem = new THREE.Points(pGeometry, pOldMaterial);
-      sceneObject.add(pOldSystem);
-    } else if (dsource == "lsst") {
-      pLsstMaterial = new THREE.PointsMaterial({
-        size: lsstPSize,
+        vertexColors: THREE.VertexColors,
+        blending: blending,
+        //depthWrite: false,  // looks weird?...
+        map: sprite,
+        alphaTest: 0.5,
+        transparent: true //or false?
+      }),
+      // Unselected SNe Material
+      new THREE.PointsMaterial({
+        size: pSizes[0],
         sizeAttenuation: useSizeAttenuation,
-        vertexColors: THREE.VertexColors
-      });
-      pLsstSystem = new THREE.Points(pGeometry, pLsstMaterial);
-      sceneObject.add(pLsstSystem);
-    }
+        blending: blending,
+        //depthWrite: false,  // looks weird?...
+        map: sprite,
+        transparent: true, //or false?
+        opacity: 0.1
+      })
+    ];
+    // Define groups for time Ranges
+    self.buildGroups();
+
+    pSystem = new THREE.Points(pBufferGeometry, pMaterials);
+    pSystem.sortParticles = true;
+    /*
+    console.log("hmm");
+    pBufferGeometry = new THREE.BufferGeometry().fromGeometry(pGeometry);
+    console.log("hmm");
+    pSystem = new THREE.Points(pBufferGeometry, pMaterial);
+    console.log("ok");
+    */
+    pBufferGeometry.getAttribute("position").needsUpdate = true;
+    pBufferGeometry.getAttribute("color").needsUpdate = true;
+    sceneObject.add(pSystem);
+
+    self.drawLegend();
   };
 
   // Various options for GUI.
@@ -265,262 +379,81 @@ const ParticleSystem = function () {
     this.ShowTypeI = true;
     this.ShowTypeII = true;
     this.Type = [];
-    //this.colorSNe = "#ffffff";
-    //this.colorLsst = "#0000ff";
-    this.Time = 2025;
-    this.oldSize = oldPSize;
-    this.lsstSize = lsstPSize;
-    this.Reset = function () {
+    this.Year = 2025;
+    this.Sprite = useSprite;
+    this.Size = pSizes[0];
+    this.UnselectedOpacity = 0.1;
+    this.Reset = function() {
       location.reload();
     };
+    this.Attenuation = useSizeAttenuation;
+    this.AdditiveBlending = blending === THREE.AdditiveBlending;
   };
 
   // GUI related stuff.
   var text = new defaultGui();
   var gui = new dat.GUI();
-  var dataFolder = gui.addFolder("Data set");
-  dataFolder
-    .add(text, "ShowOld")
-    .name("Show old SNe")
-    .listen()
-    .onChange(function () {
-      self.updateColors(yearBounds);
-    });
-  dataFolder
-    .add(text, "ShowLsst")
-    .name("Show LSST SNe")
-    .listen()
-    .onChange(function () {
-      self.updateColors(yearBounds);
-    });
-  dataFolder.open();
-  var typeFolder = gui.addFolder("SNe Type");
-  typeFolder
-    .add(text, "ShowTypeIa")
-    .name("Show Type Ia SNe")
-    .listen()
-    .onChange(function () {
-      self.updateColors(yearBounds);
-    });
-  typeFolder
-    .add(text, "ShowTypeI")
-    .name("Show Type I SNe")
-    .listen()
-    .onChange(function () {
-      self.updateColors(yearBounds);
-    });
-  typeFolder
-    .add(text, "ShowTypeII")
-    .name("Show Type II SNe")
-    .listen()
-    .onChange(function () {
-      self.updateColors(yearBounds);
-    });
-  typeFolder.open();
+  var filterFolder = gui.addFolder("Filter Supernovae");
 
-  gui.add(text, "Time", 1885, 2025).onChange(function (val) {
+  filterFolder.add(text, "Year", 1885, 2025).onChange(function(val) {
     yearBounds[1] = Math.floor(val);
-    console.log("upper bound set: " + yearBounds[1]);
-    self.updateColors(yearBounds);
-  });
-  gui.add(text, "oldSize", 1, 5).onChange(function (val) {
-    oldPSize = val;
-    pOldSystem.material.size = oldPSize;
-  });
-  gui.add(text, "lsstSize", 1, 5).onChange(function (val) {
-    lsstPSize = val;
-    pLsstSystem.material.size = lsstPSize;
+    self.buildGroups();
   });
 
-  /* to implement after alpha - change color
-    var colorFolder = gui.addFolder("Color");
-    colorFolder
-      .addColor(text, "colorSNe")
-      .name("Old data color")
-      .onChange(function() {
-        console.log(text.colorSNe);
-        pOldSystem.material.color.set(text.colorSNe);
-      });
-    colorFolder
-      .addColor(text, "colorLsst")
-      .name("Lsst data color")
-      .onChange(function() {
-        pLsstSystem.material.color.set(text.colorLsst);
-      });
-  */
-  self.updateColors = function (bounds) {
-    var i; // iterator
-    var OldSNeCount = 0; // Count of Old SNe Data
-    var OldTypeIaCount = 0; // Count of Old SNe Data Type Ia
-    var OldTypeICount = 0; // Count of Old SNe Data Type I
-    var OldTypeIICount = 0; // Count of Old SNe Data Type II
-    var LSSTCount = 0; // Count of LSST Data
-    var LSSTTypeIaCount = 0; // Count of LSST Data Type Ia
-    var LSSTTypeICount = 0; // Count of LSST Data Type I
-    var LSSTTypeIICount = 0; // Count of LSST Data Type II
-    console.log("Updating: ");
-    if (text.ShowOld) {
-      console.log("ShowOld: " + text.ShowOld);
-      for (i = 0; i < oldData.length; i++) {
-        if (
-          oldData[i].Type === "Ia" &&
-          text.ShowTypeIa &&
-          bounds[0] <= Math.floor(oldData[i].T) &&
-          Math.floor(oldData[i].T) <= bounds[1]
-        ) {
-          OldTypeIaCount++;
-          OldSNeCount++;
-          pOldSystem.geometry.colors[i].set(pColors[0]);
-          pOldSystem.geometry.vertices[i].set(
-            oldData[i].X,
-            oldData[i].Y,
-            oldData[i].Z
-          );
-        } else if (
-          oldData[i].Type === "I" &&
-          text.ShowTypeI &&
-          bounds[0] <= Math.floor(oldData[i].T) &&
-          Math.floor(oldData[i].T) <= bounds[1]
-        ) {
-          OldTypeICount++;
-          OldSNeCount++;
-          pOldSystem.geometry.colors[i].set(pColors[2]);
-          pOldSystem.geometry.vertices[i].set(
-            oldData[i].X,
-            oldData[i].Y,
-            oldData[i].Z
-          );
-        } else if (
-          oldData[i].Type === "II" &&
-          text.ShowTypeII &&
-          bounds[0] <= Math.floor(oldData[i].T) &&
-          Math.floor(oldData[i].T) <= bounds[1]
-        ) {
-          OldTypeIICount++;
-          OldSNeCount++;
-          pOldSystem.geometry.colors[i].set(pColors[4]);
-          pOldSystem.geometry.vertices[i].set(
-            oldData[i].X,
-            oldData[i].Y,
-            oldData[i].Z
-          );
-        } else {
-          pOldSystem.geometry.colors[i].set("#000000");
-          pOldSystem.geometry.vertices[i].set(0, 0, 0);
-        }
-      }
-      // pOldSystem.geometry.colorsNeedUpdate = true;
-      pOldSystem.geometry.verticesNeedUpdate = true;
-    } else {
-      for (i = 0; i < oldData.length; i++) {
-        pOldSystem.geometry.colors[i].set("#000000");
-        pOldSystem.geometry.vertices[i].set(0, 0, 0);
-      }
-      pOldSystem.geometry.colorsNeedUpdate = true;
-      pOldSystem.geometry.verticesNeedUpdate = true;
+  var settingsFolder = gui.addFolder("Point Settings");
+
+  settingsFolder.add(text, "Size", 0, 15).onChange(function(val) {
+    pSizes[0] = val;
+    self.updateParticleSettings();
+  });
+  settingsFolder.add(text, "Attenuation").onChange(function(val) {
+    useSizeAttenuation = val;
+    self.updateParticleSettings();
+  });
+  settingsFolder.add(text, "Sprite").onChange(function(val) {
+    useSprite = val;
+    self.updateParticleSettings();
+  });
+  settingsFolder.add(text, "AdditiveBlending").onChange(function(val) {
+    blending = val ? THREE.AdditiveBlending : THREE.NormalBlending;
+    self.updateParticleSettings();
+  });
+  settingsFolder.add(text, "UnselectedOpacity", 0, 1).onChange(function(val) {
+    unselectedOpacity = val;
+    self.updateParticleSettings();
+  });
+  filterFolder.open();
+  settingsFolder.open();
+
+  self.updateTypeView = function(typeIndex, typeMaterialID, show) {
+    console.log("toggling group: " + typeIndex + " " + show);
+    pBufferGeometry.groups[typeIndex].materialIndex = show
+      ? typeMaterialID
+      : typeMaterial.Hidden;
+    pBufferGeometry.groups[typeIndex].needsUpdate = true;
+  };
+
+  self.updateParticleSettings = function() {
+    for (var i = 0; i < pMaterials.length; i++) {
+      pMaterials[i].size = pSizes[0];
+      pMaterials[i].sizeAttenuation = useSizeAttenuation;
+      pMaterials[i].blending = i == 0 ? blending : THREE.NormalBlending;
+      pMaterials[i].map = useSprite ? sprite : null;
+      pMaterials[i].opacity = i == 1 ? unselectedOpacity : 1.0;
+      pMaterials[i].needsUpdate = true;
     }
-    if (text.ShowLsst) {
-      console.log("ShowLsst: " + text.ShowLsst);
-      for (i = 0; i < lsstData.length; i++) {
-        if (
-          lsstData[i].Type === "Ia" &&
-          text.ShowTypeIa &&
-          yearBounds[0] <= Math.floor(lsstData[i].T) &&
-          Math.floor(lsstData[i].T) <= yearBounds[1]
-        ) {
-          LSSTTypeIaCount++;
-          LSSTCount++;
-          pLsstSystem.geometry.colors[i].set(pColors[1]);
-          pLsstSystem.geometry.vertices[i].set(
-            lsstData[i].X,
-            lsstData[i].Y,
-            lsstData[i].Z
-          );
-        } else if (
-          lsstData[i].Type === "I" &&
-          text.ShowTypeI &&
-          yearBounds[0] <= Math.floor(lsstData[i].T) &&
-          Math.floor(lsstData[i].T) <= yearBounds[1]
-        ) {
-          LSSTTypeICount++;
-          LSSTCount++;
-          pLsstSystem.geometry.colors[i].set(pColors[3]);
-          pLsstSystem.geometry.vertices[i].set(
-            lsstData[i].X,
-            lsstData[i].Y,
-            lsstData[i].Z
-          );
-        } else if (
-          lsstData[i].Type === "II" &&
-          text.ShowTypeII &&
-          yearBounds[0] <= Math.floor(lsstData[i].T) &&
-          Math.floor(lsstData[i].T) <= yearBounds[1]
-        ) {
-          LSSTTypeIICount++;
-          LSSTCount++;
-          pLsstSystem.geometry.colors[i].set(pColors[5]);
-          pLsstSystem.geometry.vertices[i].set(
-            lsstData[i].X,
-            lsstData[i].Y,
-            lsstData[i].Z
-          );
-        } else {
-          pLsstSystem.geometry.colors[i].set("#000000");
-          pLsstSystem.geometry.vertices[i].set(0, 0, 0);
-        }
-      }
-      pLsstSystem.geometry.colorsNeedUpdate = true;
-      pLsstSystem.geometry.verticesNeedUpdate = true;
-    } else {
-      for (i = 0; i < lsstData.length; i++) {
-        pLsstSystem.geometry.colors[i].set("#000000");
-        pLsstSystem.geometry.vertices[i].set(0, 0, 0);
-      }
-      pLsstSystem.geometry.colorsNeedUpdate = true;
-      pLsstSystem.geometry.verticesNeedUpdate = true;
-    }
-    console.log(
-      OldSNeCount +
-      " " +
-      OldTypeIaCount +
-      " " +
-      OldTypeICount +
-      " " +
-      OldTypeIICount +
-      " "
-    );
-    console.log(
-      LSSTCount +
-      " " +
-      LSSTTypeIaCount +
-      " " +
-      LSSTTypeICount +
-      " " +
-      LSSTTypeIICount +
-      " "
-    );
-    $("#DisplayCount").text(
-      "Old SNe : " +
-      OldSNeCount +
-      " Type Ia : " +
-      OldTypeIaCount +
-      " Type I : " +
-      OldTypeICount +
-      " Type II : " +
-      OldTypeIICount +
-      " LSST : " +
-      LSSTCount +
-      " Type Ia : " +
-      LSSTTypeIaCount +
-      " Type I : " +
-      LSSTTypeICount +
-      " Type II : " +
-      LSSTTypeIICount
-    );
   };
 
   // Draw Legend
-  self.drawLegend = function () {
+  self.drawLegend = function() {
+    $("#DisplayCount").text("Old SNe : " + numOld + " LSST : " + numLsst);
+
+    d3.select("#legend")
+      .selectAll("text")
+      .remove();
+    d3.select("#legend")
+      .selectAll("circle")
+      .remove();
     var svg = d3.select("#legend");
     svg.attr("background-color", "black");
     svg
@@ -533,7 +466,7 @@ const ParticleSystem = function () {
       .append("text")
       .attr("x", 40)
       .attr("y", 15)
-      .text("Old Type Ia")
+      .text("Old Type Ia - " + numOldIa)
       .style("font-size", "15px")
       .style("fill", pColors[0])
       .attr("alignment-baseline", "middle");
@@ -547,7 +480,7 @@ const ParticleSystem = function () {
       .append("text")
       .attr("x", 240)
       .attr("y", 15)
-      .text("Old Type I")
+      .text("Old Type I - " + numOldI)
       .style("font-size", "15px")
       .style("fill", pColors[2])
       .attr("alignment-baseline", "middle");
@@ -561,7 +494,7 @@ const ParticleSystem = function () {
       .append("text")
       .attr("x", 440)
       .attr("y", 15)
-      .text("Old Type II")
+      .text("Old Type II - " + numOldII)
       .style("font-size", "15px")
       .style("fill", pColors[4])
       .attr("alignment-baseline", "middle");
@@ -575,7 +508,7 @@ const ParticleSystem = function () {
       .append("text")
       .attr("x", 40)
       .attr("y", 36)
-      .text("Lsst Type Ia")
+      .text("Lsst Type Ia - " + numLsstIa)
       .style("font-size", "15px")
       .style("fill", pColors[1])
       .attr("alignment-baseline", "middle");
@@ -589,7 +522,7 @@ const ParticleSystem = function () {
       .append("text")
       .attr("x", 240)
       .attr("y", 36)
-      .text("LSST Type I")
+      .text("LSST Type I - " + numLsstI)
       .style("font-size", "15px")
       .style("fill", pColors[3])
       .attr("alignment-baseline", "middle");
@@ -603,30 +536,82 @@ const ParticleSystem = function () {
       .append("text")
       .attr("x", 440)
       .attr("y", 36)
-      .text("LSST Type II")
+      .text("LSST Type II - " + numLsstII)
       .style("font-size", "15px")
       .style("fill", pColors[5])
       .attr("alignment-baseline", "middle");
   };
+  self.buildGroups = function() {
+    // Don't make any changes if there is no data to change
+    // store starting index and number of values to change
+    var indexLength = yearIndexes[yearBounds[1].toString()];
+    if (indexLength !== undefined) {
+      pBufferGeometry.clearGroups();
+      pBufferGeometry.addGroup(0, yearIndex[0], typeMaterial.Hidden);
+      pBufferGeometry.addGroup(
+        yearIndex[0],
+        indexLength[1] === 0 ? 1 : indexLength[1],
+        typeMaterial.Show
+      );
+      pBufferGeometry.addGroup(
+        indexLength[1] + 1,
+        snData.length - indexLength[1],
+        typeMaterial.Hidden
+      );
+      console.log("Updating groups:");
+      console.log(
+        yearBounds[1] + " index: " + yearIndexes[yearBounds[1].toString()]
+      );
+      console.log("YearBounds:" + yearBounds);
+      console.log("YearIndex: " + yearIndex);
+      for (var i = 0; i < pBufferGeometry.groups.length; i++) {
+        pBufferGeometry.groups[i].needsUpdate = true;
+      }
+      // recount SNe variables
+      numOld = numOldI = numOldII = numOldIa = numLsst = numLsstI = numLsstII = numLsstIa = 0;
+      for (var i = 0; i < snData.length; i++) {
+        if (snData[i].T >= yearBounds[0] && snData[i].T <= yearBounds[1]) {
+          if (snData[i].Source === "Old") {
+            numOld++;
+            if (snData[i].Type === "I") {
+              numOldI++;
+            }
+            if (snData[i].Type === "II") {
+              numOldII++;
+            }
+            if (snData[i].Type === "Ia") {
+              numOldIa++;
+            }
+          } else if (snData[i].Source === "LSST") {
+            numLsst++;
 
+            if (snData[i].Type === "I") {
+              numLsstI++;
+            }
+
+            if (snData[i].Type === "II") {
+              numLsstII++;
+            }
+
+            if (snData[i].Type === "Ia") {
+              numLsstIa++;
+            }
+          }
+        }
+      }
+      console.log(numOld);
+      console.log(numLsst);
+      self.drawLegend();
+    }
+  };
   // data loading function
   self.loadData = function () {
     // read the old SNe csv file
     console.log("Loading Data: data/OpenSNCatConverted.csv");
     d3.csv("data/OpenSNCatConverted.csv")
       // iterate over the rows of the csv file
-      .row(function (d) {
-        // get the min bounds
-        bounds.minX = Math.min(bounds.minX || Infinity, d.x);
-        bounds.minY = Math.min(bounds.minY || Infinity, d.Points1);
-        bounds.minZ = Math.min(bounds.minZ || Infinity, d.Points2);
-
-        // get the max bounds
-        bounds.maxX = Math.max(bounds.maxX || -Infinity, d.Points0);
-        bounds.maxY = Math.max(bounds.maxY || -Infinity, d.Points1);
-        bounds.maxZ = Math.max(bounds.maxY || -Infinity, d.Points2);
+      .row(function(d) {
         oldData.push({
-          // Luminosity
           // SNe Name, host, type
           Name: String(d.name),
           Host: String(d.host),
@@ -636,15 +621,16 @@ const ParticleSystem = function () {
           Y: Number(d.y),
           Z: Number(d.z),
           // Time
-          T: Number(d.t),
+          T: Number(Math.floor(d.t)),
           // Luminosity
-          L: Number(d.log10lum)
+          L: Number(d.log10lum),
+          Source: String("Old")
         });
       })
       // when done loading
-      .get(function () {
-        // create the particle system for old data
-        self.createParticleSystem(oldData, "old");
+      .get(function() {
+        numOld = oldData.length;
+        console.log("Loaded Old Data: " + numOld + " SNe");
       });
 
     console.log("Loading Data: data/LSSTConverted.csv");
@@ -658,17 +644,34 @@ const ParticleSystem = function () {
           Y: Number(d.y),
           Z: Number(d.z),
           // Time
-          T: Number(d.t)
+          T: Number(Math.floor(d.t)),
+          Source: String("LSST")
         });
       })
       // when done loading
-      .get(function () {
+      .get(function() {
+        numLsst = lsstData.length;
+        console.log("Loaded LSST Data: " + numLsst + " SNe");
+
+        // concat old and new data
+        snData = oldData.concat(lsstData);
+
+        snData.sort(function(a, b) {
+          return a.T > b.T ? 1 : -1;
+        });
+        console.log("Combined data: " + snData.length + " SNe");
+        yearBounds[0] = snData[0].T;
+        yearBounds[1] = snData[snData.length - 1].T;
+        yearIndex[0] = 0;
+        yearIndex[1] = snData.length - 1;
+        console.log("Year Bounds: " + yearBounds);
+        console.log("Year Indexes: " + yearIndex);
         // create the particle system for lsst data
-        self.createParticleSystem(lsstData, "lsst");
-        self.updateColors(yearBounds);
-        pOldSystem.geometry.colorsNeedUpdate = true;
-        pLsstSystem.geometry.colorsNeedUpdate = true;
-        self.drawLegend();
+        self.createParticleSystem(snData);
+
+        //self.updateColors(yearBounds);
+        //pSystem.geometry.colorsNeedUpdate = true;
+        //pSystem.geometry.colorsNeedUpdate = true;
       });
     // d3.csv("data/sneCount.csv")
     //   .row(function(d) {
