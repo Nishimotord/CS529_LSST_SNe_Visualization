@@ -1,9 +1,12 @@
 # VDS LSST SNe Visualization Project
 
+View a live version [here](https://nishimo1.people.uic.edu/LSST_SNe_Visualization/)
+
 ## How to run this code?
 
 1. clone repo (https://github.com/Nishimotord/CS529_LSST_SNe_Visualization)
-2. download [LSST Converted Data](https://drive.google.com/file/d/1WVTjf5E1RqBSWXGxdOdK26PFtm_twMRR/view?usp=sharing) and place in data/
+2. download [LSST Converted Data](https://drive.google.com/open?id=1s3TuXdst0C_iZ7r3ujDsMnZx_nOtP8KK)
+   and place in data/
 3. Start an http server (with python3): python -m http.server 8888
 4. Go to http://localhost:8888
 
