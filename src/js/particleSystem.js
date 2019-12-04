@@ -21,6 +21,7 @@ const ParticleSystem = function() {
   // setup the pointer to the scope 'this' variable
   const self = this;
 
+  var numHosts = 0;
   var numOld = 0,
     numOldI = 0,
     numOldII = 0,
@@ -53,6 +54,7 @@ const ParticleSystem = function() {
 
   // data containers
   var snData = [];
+  const hostData = [];
   const oldData = [];
   const lsstData = [];
 
@@ -123,6 +125,7 @@ const ParticleSystem = function() {
   $(document).ready(readyFn);
   // creates the particle system
   self.createParticleSystem = function(data) {
+    var hostGeometry = new THREE.Geometry();
     pBufferGeometry = new THREE.BufferGeometry();
     var positions = new Float32Array(data.length * 3);
     var colors = new Float32Array(data.length * 3);
@@ -478,6 +481,29 @@ const ParticleSystem = function() {
   };
   // data loading function
   self.loadData = function() {
+    // read the old SNe Host csv file
+    console.log("Loading Data: data/OpenSNCatHostsConverted.csv");
+    d3.csv("data/OpenSNCatHostsConverted.csv")
+      // iterate over the rows of the csv file
+      .row(function(d) {
+        hostData.push({
+          // SNe Name, host, type
+          Name: String(d.name),
+          // Position
+          X: Number(d.x),
+          Y: Number(d.y),
+          Z: Number(d.z),
+          Source: String("Host")
+        });
+      })
+      // when done loading
+      .get(function() {
+        numHosts = hostData.length;
+        console.log(
+          "Loaded Host Data: " + numHosts + " Host Galaxies/Clusters"
+        );
+      });
+
     // read the old SNe csv file
     console.log("Loading Data: data/OpenSNCatConverted.csv");
     d3.csv("data/OpenSNCatConverted.csv")
