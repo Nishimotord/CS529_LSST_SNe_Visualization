@@ -17,7 +17,7 @@ var App = App || {};
 
 // Start of ParticleSystem function
 
-const ParticleSystem = function () {
+const ParticleSystem = function() {
   // setup the pointer to the scope 'this' variable
   const self = this;
 
@@ -99,64 +99,70 @@ const ParticleSystem = function () {
     height = 300 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
-  var context = d3.select("#my_datavizLSST")
+  var context = d3
+    .select("#my_datavizLSST")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
-    .attr("transform",
-      "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   var svg = d3.select("svg");
-  svg.append("defs").append("clipPath")
+  svg
+    .append("defs")
+    .append("clipPath")
     .attr("id", "clip")
-  .append("rect")
+    .append("rect")
     .attr("width", width)
     .attr("height", height);
 
-  d3.csv("data/sneCount.csv", function (data) {
-
+  d3.csv("data/sneCount.csv", function(data) {
     // List of groups = header of the csv files
-    var keys = data.columns.slice(1)
+    var keys = data.columns.slice(1);
 
     // Add X axis
-    var x = d3.scaleLinear()
+    var x = d3
+      .scaleLinear()
       .domain([1885, 2019])
       .range([0, width - 300]);
-    context.append("g")
+    context
+      .append("g")
       .attr("transform", "translate(0,100)")
       .call(d3.axisBottom(x));
 
-    var x2 = d3.scaleLinear()
+    var x2 = d3
+      .scaleLinear()
       .domain([2021, 2025])
       .range([width - 290, width]);
-    context.append("g")
+    context
+      .append("g")
       .attr("transform", "translate(0,100)")
       .call(d3.axisBottom(x2));
-    
-      // Add Y axis
-    var y = d3.scaleLinear()
+
+    // Add Y axis
+    var y = d3
+      .scaleLinear()
       .domain([0, 1500])
       .range([100, 0]);
-    context.append("g")
-      .call(d3.axisLeft(y));
+    context.append("g").call(d3.axisLeft(y));
 
-      var y2 = d3.scaleLinear()
+    var y2 = d3
+      .scaleLinear()
       .domain([0, 1200000])
       .range([120, 250]);
-    context.append("g")
-      .call(d3.axisLeft(y2));
+    context.append("g").call(d3.axisLeft(y2));
 
     // color palette
-    var color = d3.scaleOrdinal()
+    var color = d3
+      .scaleOrdinal()
       .domain(keys)
-      .range(['#8da0cb', '#66c2a5', '#a6d854'])
+      .range(["#8da0cb", "#66c2a5", "#a6d854"]);
 
     //stack the data?
-    var stackedData = d3.stack()
+    var stackedData = d3
+      .stack()
       .offset(d3.wiggle)
-      .keys(keys)
-      (data)
+      .keys(keys)(data);
 
     // Show the areas
     context
@@ -164,62 +170,71 @@ const ParticleSystem = function () {
       .data(stackedData)
       .enter()
       .append("path")
-      .style("fill", function (d) { return color(d.key); })
-      .attr("d", d3.area()
-        .x(function (d, i) { 
-          if(d.data.Date < 2020){
-            return x(d.data.Date); 
-          }
-          else{
-            return x2(d.data.Date);
-          }
-        })
-        .y0(function (d) { 
-          if(d.data.Date < 2020){
-            return y(d[0]); 
-          }
-          else {
-            return y2(d[0]);
-          }
-        })
-        .y1(function (d) { 
-          if(d.data.Date < 2020){ 
-            return y(d[1]); 
-          }
-          else {
-            return y2(d[1]);
-          }
-        })
-      )
+      .style("fill", function(d) {
+        return color(d.key);
+      })
+      .attr(
+        "d",
+        d3
+          .area()
+          .x(function(d, i) {
+            if (d.data.Date < 2020) {
+              return x(d.data.Date);
+            } else {
+              return x2(d.data.Date);
+            }
+          })
+          .y0(function(d) {
+            if (d.data.Date < 2020) {
+              return y(d[0]);
+            } else {
+              return y2(d[0]);
+            }
+          })
+          .y1(function(d) {
+            if (d.data.Date < 2020) {
+              return y(d[1]);
+            } else {
+              return y2(d[1]);
+            }
+          })
+      );
 
-      //Add brush variable
-      var brush = d3.brushX()
-      .extent([[0, 0], [width, height]])
+    //Add brush variable
+    var brush = d3
+      .brushX()
+      .extent([
+        [0, 0],
+        [width, height]
+      ])
       .on("brush end", brushed);
-    
-    context.append("g")
+
+    context
+      .append("g")
       .attr("class", "brush")
       .call(brush)
-      .call(brush.move, [0,810]);
+      .call(brush.move, [0, 810]);
 
-      //Add brushing function
-      function brushed() {
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-        if(d3.event.selection == null) return;
-        var s2 = d3.event.selection || x2.range();
-        console.log(s2);
-        var [x0, x1] = [0, 0];
-        if(s2[0] >= 0 && s2[1] <= 510){
-          [x0, x1] = s2.map(d => Math.floor(x.invert(d)));}
-        else if (s2[0] <= 510 && s2[1] >= 510) {
-          x0 = s2.map(d => Math.floor(x.invert(d)))[0];
-          x1 = s2.map(d => Math.floor(x2.invert(d)))[1];
-        }
-        else{
-          [x0, x1] = s2.map(d => Math.floor(x2.invert(d)));}
-        console.log([x0,x1]);
-
+    //Add brushing function
+    function brushed() {
+      if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+      if (d3.event.selection == null) return;
+      var s2 = d3.event.selection || x2.range();
+      console.log(s2);
+      var [x0, x1] = [0, 0];
+      if (s2[0] >= 0 && s2[1] <= 510) {
+        [x0, x1] = s2.map(d => Math.floor(x.invert(d)));
+      } else if (s2[0] <= 510 && s2[1] >= 510) {
+        x0 = s2.map(d => Math.floor(x.invert(d)))[0];
+        x1 = s2.map(d => Math.floor(x2.invert(d)))[1];
+      } else {
+        [x0, x1] = s2.map(d => Math.floor(x2.invert(d)));
       }
+      console.log([x0, x1]);
+      yearBounds[0] = x0;
+      yearBounds[1] = x1;
+      self.buildGroups();
+    }
   });
 
   document.getElementById("help").addEventListener("click", readyFn);
@@ -372,7 +387,7 @@ const ParticleSystem = function () {
   };
 
   // Various options for GUI.
-  var defaultGui = function () {
+  var defaultGui = function() {
     this.ShowOld = true;
     this.ShowLsst = true;
     this.ShowTypeIa = true;
@@ -544,18 +559,21 @@ const ParticleSystem = function () {
   self.buildGroups = function() {
     // Don't make any changes if there is no data to change
     // store starting index and number of values to change
+    yearIndex[0] = yearIndexes[yearBounds[0].toString()][0];
+    yearIndex[1] = yearIndexes[yearBounds[1].toString()][1];
+    console.log("Indexes: " + yearIndex[0] + "," + yearIndex[1]);
     var indexLength = yearIndexes[yearBounds[1].toString()];
     if (indexLength !== undefined) {
       pBufferGeometry.clearGroups();
-      pBufferGeometry.addGroup(0, yearIndex[0], typeMaterial.Hidden);
       pBufferGeometry.addGroup(
-        yearIndex[0],
-        indexLength[1] === 0 ? 1 : indexLength[1],
+        yearIndex[0] + 1,
+        yearIndex[1] - yearIndex[0],
         typeMaterial.Show
       );
+      pBufferGeometry.addGroup(0, yearIndex[0], typeMaterial.Hidden);
       pBufferGeometry.addGroup(
-        indexLength[1] + 1,
-        snData.length - indexLength[1],
+        yearIndex[1] - yearIndex[0] + 1,
+        snData.length - (yearIndex[1] - yearIndex[0]),
         typeMaterial.Hidden
       );
       console.log("Updating groups:");
@@ -567,6 +585,8 @@ const ParticleSystem = function () {
       for (var i = 0; i < pBufferGeometry.groups.length; i++) {
         pBufferGeometry.groups[i].needsUpdate = true;
       }
+      console.log(pBufferGeometry.groups);
+
       // recount SNe variables
       numOld = numOldI = numOldII = numOldIa = numLsst = numLsstI = numLsstII = numLsstIa = 0;
       for (var i = 0; i < snData.length; i++) {
@@ -605,7 +625,7 @@ const ParticleSystem = function () {
     }
   };
   // data loading function
-  self.loadData = function () {
+  self.loadData = function() {
     // read the old SNe csv file
     console.log("Loading Data: data/OpenSNCatConverted.csv");
     d3.csv("data/OpenSNCatConverted.csv")
@@ -636,7 +656,7 @@ const ParticleSystem = function () {
     console.log("Loading Data: data/LSSTConverted.csv");
     d3.csv("data/LSSTConverted.csv")
       // iterate over the rows of the csv file
-      .row(function (d) {
+      .row(function(d) {
         lsstData.push({
           // Position
           Type: String(d.type),
@@ -686,18 +706,17 @@ const ParticleSystem = function () {
     //   .get(function() {
     //     self.createTimeline(sneCountData);
     //   })
-
   };
 
   // publicly available functions
   self.public = {
     // load the data and setup the system
-    initialize: function () {
+    initialize: function() {
       self.loadData();
     },
 
     // accessor for the particle system
-    getParticleSystems: function () {
+    getParticleSystems: function() {
       return sceneObject;
     }
   };
