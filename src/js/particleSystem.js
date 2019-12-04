@@ -17,7 +17,7 @@ var App = App || {};
 
 // Start of ParticleSystem function
 
-const ParticleSystem = function() {
+const ParticleSystem = function () {
   // setup the pointer to the scope 'this' variable
   const self = this;
 
@@ -33,6 +33,7 @@ const ParticleSystem = function() {
   // data containers
   const oldData = [];
   const lsstData = [];
+  // const sneCountData = [];
 
   // scene graph group for the particle system
   const sceneObject = new THREE.Group();
@@ -57,9 +58,136 @@ const ParticleSystem = function() {
     "#fb9a99",
     "#e31a1c"
   ];
+  var margin = { top: 20, right: 30, bottom: 30, left: 60 },
+    width = 900 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
 
+  // append the svg object to the body of the page
+  var context = d3.select("#my_datavizLSST")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+      "translate(" + margin.left + "," + margin.top + ")");
+
+  var svg = d3.select("svg");
+  svg.append("defs").append("clipPath")
+    .attr("id", "clip")
+  .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
+  d3.csv("data/sneCount.csv", function (data) {
+
+    // List of groups = header of the csv files
+    var keys = data.columns.slice(1)
+
+    // Add X axis
+    var x = d3.scaleLinear()
+      .domain([1885, 2019])
+      .range([0, width - 300]);
+    context.append("g")
+      .attr("transform", "translate(0,100)")
+      .call(d3.axisBottom(x));
+
+    var x2 = d3.scaleLinear()
+      .domain([2021, 2025])
+      .range([width - 290, width]);
+    context.append("g")
+      .attr("transform", "translate(0,100)")
+      .call(d3.axisBottom(x2));
+    
+      // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, 1500])
+      .range([100, 0]);
+    context.append("g")
+      .call(d3.axisLeft(y));
+
+      var y2 = d3.scaleLinear()
+      .domain([0, 1200000])
+      .range([120, 250]);
+    context.append("g")
+      .call(d3.axisLeft(y2));
+
+    // color palette
+    var color = d3.scaleOrdinal()
+      .domain(keys)
+      .range(['#8da0cb', '#66c2a5', '#a6d854'])
+
+    //stack the data?
+    var stackedData = d3.stack()
+      .offset(d3.wiggle)
+      .keys(keys)
+      (data)
+
+    // Show the areas
+    context
+      .selectAll("mylayers")
+      .data(stackedData)
+      .enter()
+      .append("path")
+      .style("fill", function (d) { return color(d.key); })
+      .attr("d", d3.area()
+        .x(function (d, i) { 
+          if(d.data.Date < 2020){
+            return x(d.data.Date); 
+          }
+          else{
+            return x2(d.data.Date);
+          }
+        })
+        .y0(function (d) { 
+          if(d.data.Date < 2020){
+            return y(d[0]); 
+          }
+          else {
+            return y2(d[0]);
+          }
+        })
+        .y1(function (d) { 
+          if(d.data.Date < 2020){ 
+            return y(d[1]); 
+          }
+          else {
+            return y2(d[1]);
+          }
+        })
+      )
+
+      //Add brush variable
+      var brush = d3.brushX()
+      .extent([[0, 0], [width, height]])
+      .on("brush end", brushed);
+    
+    context.append("g")
+      .attr("class", "brush")
+      .call(brush)
+      .call(brush.move, [0,810]);
+
+      //Add brushing function
+      function brushed() {
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+        if(d3.event.selection == null) return;
+        var s2 = d3.event.selection || x2.range();
+        console.log(s2);
+        var [x0, x1] = [0, 0];
+        if(s2[0] >= 0 && s2[1] <= 510){
+          [x0, x1] = s2.map(d => Math.floor(x.invert(d)));}
+        else if (s2[0] <= 510 && s2[1] >= 510) {
+          x0 = s2.map(d => Math.floor(x.invert(d)))[0];
+          x1 = s2.map(d => Math.floor(x2.invert(d)))[1];
+        }
+        else{
+          [x0, x1] = s2.map(d => Math.floor(x2.invert(d)));}
+        console.log([x0,x1]);
+
+      }
+  });
+  
   // Create an x,y,z axis (r,g,b)
-  self.drawAxis = function() {
+  self.drawAxis = function () {
     // create axis lines (x,y,z, - r,g,b)
     const xAxisMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
     const yAxisMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
@@ -85,7 +213,8 @@ const ParticleSystem = function() {
   };
 
   // creates the particle system
-  self.createParticleSystem = function(data, dsource) {
+  self.createParticleSystem = function (data, dsource) {
+    // console.log(data)
     console.log(dsource + ": " + data.length);
     // use self.data to create the particle system
     // draw your particle system here!
@@ -129,7 +258,7 @@ const ParticleSystem = function() {
   };
 
   // Various options for GUI.
-  var defaultGui = function() {
+  var defaultGui = function () {
     this.ShowOld = true;
     this.ShowLsst = true;
     this.ShowTypeIa = true;
@@ -141,7 +270,7 @@ const ParticleSystem = function() {
     this.Time = 2025;
     this.oldSize = oldPSize;
     this.lsstSize = lsstPSize;
-    this.Reset = function() {
+    this.Reset = function () {
       location.reload();
     };
   };
@@ -154,14 +283,14 @@ const ParticleSystem = function() {
     .add(text, "ShowOld")
     .name("Show old SNe")
     .listen()
-    .onChange(function() {
+    .onChange(function () {
       self.updateColors(yearBounds);
     });
   dataFolder
     .add(text, "ShowLsst")
     .name("Show LSST SNe")
     .listen()
-    .onChange(function() {
+    .onChange(function () {
       self.updateColors(yearBounds);
     });
   dataFolder.open();
@@ -170,35 +299,35 @@ const ParticleSystem = function() {
     .add(text, "ShowTypeIa")
     .name("Show Type Ia SNe")
     .listen()
-    .onChange(function() {
+    .onChange(function () {
       self.updateColors(yearBounds);
     });
   typeFolder
     .add(text, "ShowTypeI")
     .name("Show Type I SNe")
     .listen()
-    .onChange(function() {
+    .onChange(function () {
       self.updateColors(yearBounds);
     });
   typeFolder
     .add(text, "ShowTypeII")
     .name("Show Type II SNe")
     .listen()
-    .onChange(function() {
+    .onChange(function () {
       self.updateColors(yearBounds);
     });
   typeFolder.open();
 
-  gui.add(text, "Time", 1885, 2025).onChange(function(val) {
+  gui.add(text, "Time", 1885, 2025).onChange(function (val) {
     yearBounds[1] = Math.floor(val);
     console.log("upper bound set: " + yearBounds[1]);
     self.updateColors(yearBounds);
   });
-  gui.add(text, "oldSize", 1, 5).onChange(function(val) {
+  gui.add(text, "oldSize", 1, 5).onChange(function (val) {
     oldPSize = val;
     pOldSystem.material.size = oldPSize;
   });
-  gui.add(text, "lsstSize", 1, 5).onChange(function(val) {
+  gui.add(text, "lsstSize", 1, 5).onChange(function (val) {
     lsstPSize = val;
     pLsstSystem.material.size = lsstPSize;
   });
@@ -219,7 +348,7 @@ const ParticleSystem = function() {
         pLsstSystem.material.color.set(text.colorLsst);
       });
   */
-  self.updateColors = function(bounds) {
+  self.updateColors = function (bounds) {
     var i; // iterator
     var OldSNeCount = 0; // Count of Old SNe Data
     var OldTypeIaCount = 0; // Count of Old SNe Data Type Ia
@@ -280,7 +409,7 @@ const ParticleSystem = function() {
           pOldSystem.geometry.vertices[i].set(0, 0, 0);
         }
       }
-      pOldSystem.geometry.colorsNeedUpdate = true;
+      // pOldSystem.geometry.colorsNeedUpdate = true;
       pOldSystem.geometry.verticesNeedUpdate = true;
     } else {
       for (i = 0; i < oldData.length; i++) {
@@ -352,46 +481,46 @@ const ParticleSystem = function() {
     }
     console.log(
       OldSNeCount +
-        " " +
-        OldTypeIaCount +
-        " " +
-        OldTypeICount +
-        " " +
-        OldTypeIICount +
-        " "
+      " " +
+      OldTypeIaCount +
+      " " +
+      OldTypeICount +
+      " " +
+      OldTypeIICount +
+      " "
     );
     console.log(
       LSSTCount +
-        " " +
-        LSSTTypeIaCount +
-        " " +
-        LSSTTypeICount +
-        " " +
-        LSSTTypeIICount +
-        " "
+      " " +
+      LSSTTypeIaCount +
+      " " +
+      LSSTTypeICount +
+      " " +
+      LSSTTypeIICount +
+      " "
     );
     $("#DisplayCount").text(
       "Old SNe : " +
-        OldSNeCount +
-        " Type Ia : " +
-        OldTypeIaCount +
-        " Type I : " +
-        OldTypeICount +
-        " Type II : " +
-        OldTypeIICount +
-        " LSST : " +
-        LSSTCount +
-        " Type Ia : " +
-        LSSTTypeIaCount +
-        " Type I : " +
-        LSSTTypeICount +
-        " Type II : " +
-        LSSTTypeIICount
+      OldSNeCount +
+      " Type Ia : " +
+      OldTypeIaCount +
+      " Type I : " +
+      OldTypeICount +
+      " Type II : " +
+      OldTypeIICount +
+      " LSST : " +
+      LSSTCount +
+      " Type Ia : " +
+      LSSTTypeIaCount +
+      " Type I : " +
+      LSSTTypeICount +
+      " Type II : " +
+      LSSTTypeIICount
     );
   };
 
   // Draw Legend
-  self.drawLegend = function() {
+  self.drawLegend = function () {
     var svg = d3.select("#legend");
     svg.attr("background-color", "black");
     svg
@@ -481,12 +610,12 @@ const ParticleSystem = function() {
   };
 
   // data loading function
-  self.loadData = function() {
+  self.loadData = function () {
     // read the old SNe csv file
     console.log("Loading Data: data/OpenSNCatConverted.csv");
     d3.csv("data/OpenSNCatConverted.csv")
       // iterate over the rows of the csv file
-      .row(function(d) {
+      .row(function (d) {
         // get the min bounds
         bounds.minX = Math.min(bounds.minX || Infinity, d.x);
         bounds.minY = Math.min(bounds.minY || Infinity, d.Points1);
@@ -513,7 +642,7 @@ const ParticleSystem = function() {
         });
       })
       // when done loading
-      .get(function() {
+      .get(function () {
         // create the particle system for old data
         self.createParticleSystem(oldData, "old");
       });
@@ -521,7 +650,7 @@ const ParticleSystem = function() {
     console.log("Loading Data: data/LSSTConverted.csv");
     d3.csv("data/LSSTConverted.csv")
       // iterate over the rows of the csv file
-      .row(function(d) {
+      .row(function (d) {
         lsstData.push({
           // Position
           Type: String(d.type),
@@ -533,7 +662,7 @@ const ParticleSystem = function() {
         });
       })
       // when done loading
-      .get(function() {
+      .get(function () {
         // create the particle system for lsst data
         self.createParticleSystem(lsstData, "lsst");
         self.updateColors(yearBounds);
@@ -541,17 +670,31 @@ const ParticleSystem = function() {
         pLsstSystem.geometry.colorsNeedUpdate = true;
         self.drawLegend();
       });
+    // d3.csv("data/sneCount.csv")
+    //   .row(function(d) {
+    //     sneCountData.push({
+    //       Date: Date(d.date),
+    //       CountI: Number(d.I),
+    //       CountIa: Number(d.Ia),
+    //       CountII: Number(d.II)
+    //     });
+    //   })
+    //   //when done loading
+    //   .get(function() {
+    //     self.createTimeline(sneCountData);
+    //   })
+
   };
 
   // publicly available functions
   self.public = {
     // load the data and setup the system
-    initialize: function() {
+    initialize: function () {
       self.loadData();
     },
 
     // accessor for the particle system
-    getParticleSystems: function() {
+    getParticleSystems: function () {
       return sceneObject;
     }
   };

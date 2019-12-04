@@ -17,7 +17,7 @@ Built on Andrew Burk's Project 3 Base code
 var App = App || {};
 
 /* Create the scene class */
-const Scene = function(options) {
+const Scene = function (options) {
   // setup the pointer to the scope 'this' variable
   const self = this;
 
@@ -68,13 +68,13 @@ const Scene = function(options) {
   // attribute or function. For more information, check
   // javascript module patterns.
   self.public = {
-    resize: function() {},
+    resize: function () { },
 
-    addObject: function(obj) {
+    addObject: function (obj) {
       self.scene.add(obj);
     },
 
-    render: function() {
+    render: function () {
       requestAnimationFrame(self.public.render);
       self.controls.update();
       self.renderer.render(self.scene, self.camera);
