@@ -30,7 +30,7 @@ const Scene = function(options) {
 
   // setup the camera
   self.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, -1);
-  self.camera.position.set(20000, 20000, 20000);
+  self.camera.position.set(10000, 10000, 10000);
   self.camera.up = new THREE.Vector3(0, 1, 0);
   self.camera.lookAt(0, 0, 0);
 

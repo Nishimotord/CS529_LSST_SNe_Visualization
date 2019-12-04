@@ -41,17 +41,15 @@ const ParticleSystem = function() {
     LsstII: 4,
     LsstIa: 5
   };
-  var typeMaterial = { Show: 0, Sprite: 1, Hidden: 2 };
 
-  var useSprite = true;
-
+  // particle-related settings
+  var typeMaterial = { Show: 0, Hidden: 1 };
   // size of particle (suggested: 0.01 - .1)
-  var pSizes = [20, 10];
+  var pSizes = [5, 10];
   var useSizeAttenuation = false;
-
-  var showAxis = true;
-
-  var isOld = false;
+  var useSprite = true;
+  var blending = THREE.NormalBlending;
+  var unselectedOpacity = 0.1;
 
   // data containers
   var snData = [];
@@ -69,17 +67,15 @@ const ParticleSystem = function() {
 
   // Variables for geometry, materials, objects.
   var pBufferGeometry;
-  var pGeometry;
   var pMaterials;
-  var particle;
-
   var pSystem;
-  var blending = THREE.NormalBlending;
 
-  var sprite = new THREE.TextureLoader().load(
+  var spriteTexture = new THREE.TextureLoader().load(
     "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/sprites/spark1.png"
     //"imgs/particle.png"
-    );
+  );
+
+  var sprite = spriteTexture;
 
   var pColors = [
     "#66c2a5",
@@ -96,39 +92,37 @@ const ParticleSystem = function() {
     new THREE.Color("rgb(231,138,195)"),
     new THREE.Color("rgb(166,216,84)"),
     new THREE.Color("rgb(255,217,47)")
-    ];
+  ];
 
-    document.getElementById("help").addEventListener("click", readyFn);
-    function readyFn() {
-        // Code to run when the document is ready.
+  document.getElementById("help").addEventListener("click", readyFn);
+  function readyFn() {
+    // Code to run when the document is ready.
 
-        var id = '#dialog';
-        var maskHeight = $(document).height();
-        var maskWidth = $(window).width();
-        $('#mask').css({ 'width': maskWidth, 'height': maskHeight });
-        $('#mask').fadeIn(500);
-        $('#mask').fadeTo("slow", 0.9);
-        var winH = $(window).height();
-        var winW = $(window).width();
-        $(id).css('top', winH / 2 - $(id).height() / 2);
-        $(id).css('left', winW / 2 - $(id).width() / 2);
-        $(id).fadeIn(500);
-        $('.window .close').click(function (e) {
-            e.preventDefault();
-            $('#mask').hide();
-            $('.window').hide();
-        });
-        $('#mask').click(function () {
-            $(this).hide();
-            $('.window').hide();
-        });
+    var id = "#dialog";
+    var maskHeight = $(document).height();
+    var maskWidth = $(window).width();
+    $("#mask").css({ width: maskWidth, height: maskHeight });
+    $("#mask").fadeIn(500);
+    $("#mask").fadeTo("slow", 0.9);
+    var winH = $(window).height();
+    var winW = $(window).width();
+    $(id).css("top", winH / 2 - $(id).height() / 2);
+    $(id).css("left", winW / 2 - $(id).width() / 2);
+    $(id).fadeIn(500);
+    $(".window .close").click(function(e) {
+      e.preventDefault();
+      $("#mask").hide();
+      $(".window").hide();
+    });
+    $("#mask").click(function() {
+      $(this).hide();
+      $(".window").hide();
+    });
+  }
 
-    }
-
-    $(document).ready(readyFn);
+  $(document).ready(readyFn);
   // creates the particle system
   self.createParticleSystem = function(data) {
-    pGeometry = new THREE.Geometry();
     pBufferGeometry = new THREE.BufferGeometry();
     var positions = new Float32Array(data.length * 3);
     var colors = new Float32Array(data.length * 3);
@@ -208,53 +202,26 @@ const ParticleSystem = function() {
     );
     pBufferGeometry.addAttribute("color", new THREE.BufferAttribute(colors, 3));
     pMaterials = [
-      /*
-      // base material for basic pixel representation
-      new THREE.PointsMaterial({
-        size: pSizes[0],
-        sizeAttenuation: useSizeAttenuation,
-        vertexColors: THREE.VertexColors
-      }),
-
-      // base material for basic sprite representation
+      // Selected SNe Material
       new THREE.PointsMaterial({
         size: pSizes[0],
         sizeAttenuation: useSizeAttenuation,
         vertexColors: THREE.VertexColors,
         blending: blending,
-        alphaTest: 0.5,
         //depthWrite: false,  // looks weird?...
         map: sprite,
-        transparent: true //or false?
-      }),
-      */
-      new THREE.PointsMaterial({
-        size: pSizes[0],
-        sizeAttenuation: useSizeAttenuation,
-        vertexColors: THREE.VertexColors,
-        blending: blending,
-        transparent: true //or false?
-      }),
-      new THREE.PointsMaterial({
-        size: pSizes[0],
-        sizeAttenuation: useSizeAttenuation,
-        vertexColors: THREE.VertexColors,
-        blending: blending,
         alphaTest: 0.5,
-        //depthWrite: false,  // looks weird?...
-        map: sprite,
         transparent: true //or false?
       }),
+      // Unselected SNe Material
       new THREE.PointsMaterial({
         size: pSizes[0],
         sizeAttenuation: useSizeAttenuation,
-        vertexColors: THREE.VertexColors,
         blending: blending,
-        alphaTest: 0.5,
         //depthWrite: false,  // looks weird?...
         map: sprite,
         transparent: true, //or false?
-        opacity: 0.0
+        opacity: 0.1
       })
     ];
     // Define groups for time Ranges
@@ -284,62 +251,51 @@ const ParticleSystem = function() {
     this.ShowTypeI = true;
     this.ShowTypeII = true;
     this.Type = [];
-    this.Time = 2025;
+    this.Year = 2025;
     this.Sprite = useSprite;
     this.Size = pSizes[0];
+    this.UnselectedOpacity = 0.1;
     this.Reset = function() {
       location.reload();
     };
     this.Attenuation = useSizeAttenuation;
-    this.Blending = blending === THREE.AdditiveBlending;
+    this.AdditiveBlending = blending === THREE.AdditiveBlending;
   };
 
   // GUI related stuff.
   var text = new defaultGui();
   var gui = new dat.GUI();
-  var dataFolder = gui.addFolder("Data set");
+  var filterFolder = gui.addFolder("Filter Supernovae");
 
-  gui.add(text, "Time", 1885, 2025).onChange(function(val) {
+  filterFolder.add(text, "Year", 1885, 2025).onChange(function(val) {
     yearBounds[1] = Math.floor(val);
     self.buildGroups();
   });
-  gui.add(text, "Size", 1, 25).onChange(function(val) {
+
+  var settingsFolder = gui.addFolder("Point Settings");
+
+  settingsFolder.add(text, "Size", 0, 15).onChange(function(val) {
     pSizes[0] = val;
-    for (var i = 0; i < pMaterials.length; i++) {
-      pMaterials[i].size = val;
-      pMaterials[i].needsUpdate = true;
-    }
+    self.updateParticleSettings();
   });
-  gui.add(text, "Attenuation").onChange(function(val) {
+  settingsFolder.add(text, "Attenuation").onChange(function(val) {
     useSizeAttenuation = val;
-    pSystem.material[
-      useSprite ? typeMaterial.Sprite : typeMaterial.Show
-    ].sizeAttenuation = useSizeAttenuation;
-    pSystem.material[
-      useSprite ? typeMaterial.Sprite : typeMaterial.Show
-    ].needsUpdate = true;
+    self.updateParticleSettings();
   });
-  gui.add(text, "Sprite").onChange(function(val) {
+  settingsFolder.add(text, "Sprite").onChange(function(val) {
     useSprite = val;
-    for (var i = 0; i < pBufferGeometry.groups.length; i++) {
-      pBufferGeometry.groups[i].materialIndex =
-        pBufferGeometry.groups[i].materialIndex === typeMaterial.Hidden
-          ? typeMaterial.Hidden
-          : useSprite
-          ? typeMaterial.Sprite
-          : typeMaterial.Show;
-      pBufferGeometry.groups[i].needsUpdate = true;
-    }
+    self.updateParticleSettings();
   });
-  gui.add(text, "Blending").onChange(function(val) {
-    pSystem.material[0].blending = val
-      ? THREE.AdditiveBlending
-      : THREE.NormalBlending;
-    pSystem.material[1].blending = val
-      ? THREE.AdditiveBlending
-      : THREE.NormalBlending;
-    pSystem.material.needsUpdate = true;
+  settingsFolder.add(text, "AdditiveBlending").onChange(function(val) {
+    blending = val ? THREE.AdditiveBlending : THREE.NormalBlending;
+    self.updateParticleSettings();
   });
+  settingsFolder.add(text, "UnselectedOpacity", 0, 1).onChange(function(val) {
+    unselectedOpacity = val;
+    self.updateParticleSettings();
+  });
+  filterFolder.open();
+  settingsFolder.open();
 
   self.updateTypeView = function(typeIndex, typeMaterialID, show) {
     console.log("toggling group: " + typeIndex + " " + show);
@@ -347,6 +303,17 @@ const ParticleSystem = function() {
       ? typeMaterialID
       : typeMaterial.Hidden;
     pBufferGeometry.groups[typeIndex].needsUpdate = true;
+  };
+
+  self.updateParticleSettings = function() {
+    for (var i = 0; i < pMaterials.length; i++) {
+      pMaterials[i].size = pSizes[0];
+      pMaterials[i].sizeAttenuation = useSizeAttenuation;
+      pMaterials[i].blending = i == 0 ? blending : THREE.NormalBlending;
+      pMaterials[i].map = useSprite ? sprite : null;
+      pMaterials[i].opacity = i == 1 ? unselectedOpacity : 1.0;
+      pMaterials[i].needsUpdate = true;
+    }
   };
 
   // Draw Legend
@@ -456,7 +423,7 @@ const ParticleSystem = function() {
       pBufferGeometry.addGroup(
         yearIndex[0],
         indexLength[1] === 0 ? 1 : indexLength[1],
-        useSprite ? typeMaterial.Sprite : typeMaterial.Show
+        typeMaterial.Show
       );
       pBufferGeometry.addGroup(
         indexLength[1] + 1,
