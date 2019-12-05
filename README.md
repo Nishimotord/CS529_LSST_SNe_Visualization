@@ -1,6 +1,18 @@
 # VDS LSST SNe Visualization Project
 
 View a live version [here](https://nishimo1.people.uic.edu/LSST_SNe_Visualization/)
+A Video of the visualization can be found [here](https://drive.google.com/file/d/1uHnRKoiwgLmp3acafUdAWf5Pq5tBaeHg/view?usp=sharing)
+
+## About
+
+This project was developed by Pavana Doddi, Ryan Nishimoto, and
+Anjali Yadla at the University of Illinois at Chicago as part of
+the Visual Data Science graduate course in Fall 2019. This project
+was developed in collaboration with Dr. Aaron Geller and Dr. Mark
+SubbaRao of the Adler Planetarium through an
+activity-centered-design process, with particular emphasis on the
+functionality of the system, and with repeated feedback from our
+client, course staff, and classmates
 
 ## How to run this code?
 
