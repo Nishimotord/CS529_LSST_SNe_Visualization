@@ -94,7 +94,7 @@ const ParticleSystem = function() {
     new THREE.Color("rgb(255,217,47)")
   ];
   var margin = { top: 20, right: 30, bottom: 30, left: 60 },
-    width = 800 - margin.left - margin.right,
+    width = 900 - margin.left - margin.right,
     height = 300 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
@@ -667,7 +667,7 @@ const ParticleSystem = function() {
     //reposition
     var w = d3.select(".particleDiv").node().clientWidth;
     var h = w / 2.5;
-    $("#legend").css({ top: h - 60, left: w - 700, position: "absolute" });
+    $("#legend").css({ top: h - 60, left: w - 600, position: "absolute" });
   };
   self.buildGroups = function() {
     // Don't make any changes if there is no data to change

@@ -58,7 +58,7 @@
     <div class="container-fluid" style="background-color: black">
       <div id="boxes">
         <div
-          style="top: 50%; left: 50%; display: none;"
+          style="top: 50%; left: 50%; display: none; width: 1200px"
           id="dialog"
           class="window"
         >
@@ -69,8 +69,56 @@
                 width="25"
                 style="float:right; margin-right: -25px; margin-top: -30px;"
             /></a>
-            <h1>SNe Visualization</h1>
-            <p></p>
+            <h1>
+              Large Synoptic Survey Telescope (LSST) Supernova (SNe)
+              Visualization
+            </h1>
+            <h3>About</h3>
+            <p>
+              This project was developed by Pavana Doddi, Ryan Nishimoto, and
+              Anjali Yadla at the University of Illinois at Chicago as part of
+              the Visual Data Science graduate course in Fall 2019. This project
+              was developed in collaboration with Dr. Aaron Geller and Dr. Mark
+              SubbaRao of the Adler Planetarium through an
+              activity-centered-design process, with particular emphasis on the
+              functionality of the system, and with repeated feedback from our
+              client, course staff, and classmates
+            </p>
+            <p>
+              This Visualization looks at positional and categorical data of SNe
+              over time of discovery. "Old" Data represents the current SNe that
+              have been discovered from multiple sources, whereas the "LSST"
+              Data represents simulated data the LSST is expected to find when
+              it becomes operational
+            </p>
+            <h3>Controls:</h3>
+            <p>Left Mouse: Rotate, Scroll: Zoom</p>
+            <h3>Point Settings:</h3>
+            <p>Size: Control size of SNe points</p>
+            <p>
+              Attenuation: Toggle whether SNe point sizes change based on
+              distance from the camera
+            </p>
+            <p>
+              Sprite: Toggle the use of a round sprite v.s. pixel representation
+              of a SNe point
+            </p>
+            <p>
+              Additive Blending: Toggle whether SNe points become brighter when
+              'stacked' on top of one another
+            </p>
+            <p>Unselected Opacity: Control how visible unselected SNe are</p>
+            <h3>Disclaimers:</h3>
+            <p>
+              This Old data is not representative of the entire SNe Dataset -
+              Data was cleaned and filtered to only include SNe that had enough
+              positional data to plot, as well as focusing only specifically on
+              Type I, Ia, and Type II SNe.
+            </p>
+            <p>
+              The LSST Data is not done being built at the time of this
+              visualization, so the data used is simulated
+            </p>
           </div>
         </div>
         <div
@@ -85,7 +133,7 @@
       </div>
       <!-- Create a div where the graph and legend will take place -->
       <div class="row">
-        <div id="my_datavizLSST" style="background-color: whitesmoke"></div>
+        <div id="my_datavizLSST" style="background-color: white"></div>
         <div>
           <svg
             id="legend"
