@@ -155,7 +155,7 @@ const ParticleSystem = function() {
     var color = d3
       .scaleOrdinal()
       .domain(keys)
-      .range(["#8da0cb", "#66c2a5", "#a6d854"]);
+      .range(["#8da0cb", "#66c2a5", "#a6d854", "#e78ac3", "#fc8d62", "#ffd92f"]);
 
     //stack the data?
     var stackedData = d3
