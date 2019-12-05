@@ -32,4 +32,4 @@ LSST SNe data is pulled from the ["Photometric LSST Astronomical Time-series Cla
 
 [Andrew Burks](https://andrewtburks.dev/) for providing the starter code.
 
-[Dr. Aaron Geller](http://faculty.wcas.northwestern.edu/aaron-geller/index.php) and [Dr. Mark SubbaRao](https://www.adlerplanetarium.org/whats-here/the-experts/astronomers/) of the Adler Planetarium for the project idea and guidance, providing us a starting point for the [Old SNe data](https://github.com/ageller/IDEAS_FSS-Vis/tree/master/WebGL/threejs/SNdata) and [LSST Data](https://github.com/ageller/UniviewSNvTime/blob/master/rawdata/convertPLAsTiCC.ipynb)
+[Dr. Aaron Geller](http://faculty.wcas.northwestern.edu/aaron-geller/index.php) and [Dr. Mark SubbaRao](https://www.adlerplanetarium.org/whats-here/the-experts/astronomers/) of the Adler Planetarium for being our client and providing us with this project and guidance, as well as a starting point for the [Old SNe data](https://github.com/ageller/IDEAS_FSS-Vis/tree/master/WebGL/threejs/SNdata) and [LSST Data](https://github.com/ageller/UniviewSNvTime/blob/master/rawdata/convertPLAsTiCC.ipynb)
