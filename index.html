@@ -27,14 +27,15 @@
     <script src="https://unpkg.com/d3-simple-slider"></script>
 
     <!-- JS Source -->
-    <script src="./src/js/scene.js"></script>
+    <script src="./src/js/scene2.js"></script>
     <script src="./src/js/particleSystem.js"></script>
     <script src="./src/js/main.js"></script>
+     
 
     <link rel="stylesheet" href="./src/css/welcomeScreen.css">
     <style>
 
-        #help {
+        #help{
             background-color: transparent;
             background-repeat: no-repeat;
             border: none;
@@ -43,6 +44,13 @@
             outline: none;
             float: right;
         }
+         #reset {
+             background-color: darkred;
+             color:antiquewhite;
+            background-repeat: no-repeat;
+            border-radius:50%;
+            float: right;
+         }
     </style>
 </head>
 
@@ -68,7 +76,9 @@
         <div >
             <button id="help"> <img src="./src/js/questionMark.png" width="25"></button>
         </div>
-
+        <div>
+            <button id="reset">Reset</button>
+        </div>
         <svg id="legend"
              height="60"
              width="1500"
