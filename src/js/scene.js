@@ -1,3 +1,4 @@
+// JavaScript source code
 /* 
 Authors: 
   Pavana Doddi
@@ -24,39 +25,45 @@ const Scene = function (options) {
     // scale the width and height to the screen size
     const width = d3.select(".particleDiv").node().clientWidth;
     const height = width / 2;
-    //var frustumSize = 600;
-    //var aspect = width / height;
+ 
     self.scene = new THREE.Scene();
-  //  var cameraRig = new THREE.Group();
+    var cameraRig = new THREE.Group();
 
-    //cameraRig.add(cameraOrtho);
    
-    //self.scene.add(cameraRig);
+    self.scene.add(cameraRig);
+
+
     // create the scene
+    var cameraOrtho = new THREE.PerspectiveCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
+    var Milkyway = 0.016203884;
+    var Andromeda = 0.0337261533;
+    var MwToA = 0.78 / 2;
+    var LocalGroup = 1.533006969;
+    var observableRadius = 14257;
+
+    var geometry1 = new THREE.RingGeometry(0.9 * Milkyway, 1.0 * Milkyway, 64);
+    var geometry2 = new THREE.RingGeometry(0.9 * Andromeda, 1.0 * Andromeda, 64);
+    var geometry3 = new THREE.RingGeometry(0.9 * MwToA, 1.0 * MwToA, 64);
+    var geometry4 = new THREE.RingGeometry(0.9 * LocalGroup, 1.0 * LocalGroup, 64);
+    var geometry5 = new THREE.RingGeometry(0.9 * observableRadius, 1.0 * observableRadius, 64);
+    var RingMaterial = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.5,
+    });
+    var ringMesh1 = new THREE.Mesh(geometry1, RingMaterial);
+    var ringMesh2 = new THREE.Mesh(geometry2, RingMaterial);
+    var ringMesh3 = new THREE.Mesh(geometry3, RingMaterial);
+    var ringMesh4 = new THREE.Mesh(geometry4, RingMaterial);
+    var ringMesh5 = new THREE.Mesh(geometry5, RingMaterial);
+    cameraRig.add(ringMesh1);
+    cameraRig.add(ringMesh2);
+    cameraRig.add(ringMesh3);
+    cameraRig.add(ringMesh4);
+    cameraRig.add(ringMesh5);
 
 
-    //var cameraOrtho = new THREE.PerspectiveCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
-    //var cameraOrthoHelper = new THREE.CameraHelper(cameraOrtho);
 
-    //var rad = 1500;
-    //var geometry = new THREE.RingGeometry(1.9 * rad, 2.0 * rad, 64);
-    //var geometry1 = new THREE.RingGeometry(0.9 * rad, 1.0 * rad, 64);
-    ////, 5, 0, Math.PI * 2.
-    //var RingMaterial = new THREE.MeshBasicMaterial({
-    //    //map: ringTex,
-    //    side: THREE.DoubleSide,
-    //    transparent: true,
-    //    opacity: 0.5,
-    //});
-    //var ringMesh = new THREE.Mesh(geometry, RingMaterial);
-    //var ringMesh1 = new THREE.Mesh(geometry1, RingMaterial);
-    //cameraRig.add(ringMesh);
-    //cameraRig.add(ringMesh1);
-   // cameraRig.position.set(0, 0, 0);
-   // cameraOrthoHelper.controls.enableRotate=false;
-    //cameraRig.lookAt(0, 0, 0);
-    //self.controls.update();
-    //cameraRig.rotation=;
     self.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, -1);
     self.camera.position.set(20000, 20000, 20000);
     self.camera.up = new THREE.Vector3(0, 1, 0);
@@ -67,7 +74,7 @@ const Scene = function (options) {
 
     // add the light to the camera and the camera to the scene
     self.scene.add(self.camera);
-  //  self.scene.add(cameraOrthoHelper);
+    self.scene.add(cameraOrtho);
 
     self.scene.background = new THREE.Color(0x000000);
     // create the renderer
@@ -82,7 +89,7 @@ const Scene = function (options) {
     // enable camera controls with OrbitControls library
     self.controls = new THREE.OrbitControls(
         self.camera,
-       // self.CameraHelper,
+       
         self.renderer.domElement
 
     );
@@ -111,7 +118,11 @@ const Scene = function (options) {
         render: function () {
             requestAnimationFrame(self.public.render);
             self.controls.update();
-
+            ringMesh5.lookAt(self.camera.position);
+            ringMesh4.lookAt(self.camera.position);
+            ringMesh3.lookAt(self.camera.position);
+            ringMesh2.lookAt(self.camera.position);
+            ringMesh1.lookAt(self.camera.position);
             self.renderer.render(self.scene, self.camera);
         }
     };
