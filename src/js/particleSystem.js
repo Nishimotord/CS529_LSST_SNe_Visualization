@@ -415,12 +415,6 @@ const ParticleSystem = function() {
   // GUI related stuff.
   var text = new defaultGui();
   var gui = new dat.GUI();
-  var filterFolder = gui.addFolder("Filter Supernovae");
-
-  filterFolder.add(text, "Year", 1885, 2025).onChange(function(val) {
-    yearBounds[1] = Math.floor(val);
-    self.buildGroups();
-  });
 
   var settingsFolder = gui.addFolder("Point Settings");
 
