@@ -1,3 +1,4 @@
 # Don't track macOS specific files
 *.DS_Store
+LSSTConverted.csv
 
