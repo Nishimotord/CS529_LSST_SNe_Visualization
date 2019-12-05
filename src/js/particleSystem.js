@@ -161,7 +161,8 @@ const ParticleSystem = function() {
     var stackedData = d3
       .stack()
       .offset(d3.wiggle)
-      .keys(keys)(data);
+      .keys(keys)
+      (data);
 
     // Show the areas
     context
@@ -169,35 +170,34 @@ const ParticleSystem = function() {
       .data(stackedData)
       .enter()
       .append("path")
-      .style("fill", function(d) {
-        return color(d.key);
-      })
-      .attr(
-        "d",
-        d3
-          .area()
-          .x(function(d, i) {
-            if (d.data.Date < 2020) {
-              return x(d.data.Date);
-            } else {
-              return x2(d.data.Date);
-            }
-          })
-          .y0(function(d) {
-            if (d.data.Date < 2020) {
-              return y(d[0]);
-            } else {
-              return y2(d[0]);
-            }
-          })
-          .y1(function(d) {
-            if (d.data.Date < 2020) {
-              return y(d[1]);
-            } else {
-              return y2(d[1]);
-            }
-          })
-      );
+      .style("fill", function (d) { return color(d.key); })
+      .attr("d", d3.area()
+        .x(function (d, i) { 
+          // console.log(d);
+          if(d.data.Date < 2020){
+            return x(d.data.Date); 
+          }
+          else{
+            return x2(d.data.Date);
+          }
+        })
+        .y0(function (d) { 
+          if(d.data.Date < 2020){
+            return y(d[0]); 
+          }
+          else {
+            return y2(d[0]);
+          }
+        })
+        .y1(function (d) { 
+          if(d.data.Date < 2020){ 
+            return y(d[1]); 
+          }
+          else {
+            return y2(d[1]);
+          }
+        })
+      )
 
     //Add brush variable
     var brush = d3
