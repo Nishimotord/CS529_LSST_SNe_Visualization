@@ -127,6 +127,8 @@ const ParticleSystem = function() {
     context
       .append("g")
       .attr("transform", "translate(0,100)")
+      .style("fill", "white")
+      .style("stroke", "white")
       .call(d3.axisBottom(x));
 
     var x2 = d3
@@ -136,6 +138,8 @@ const ParticleSystem = function() {
     context
       .append("g")
       .attr("transform", "translate(0,100)")
+      .style("fill", "white")
+      .style("stroke", "white")
       .call(d3.axisBottom(x2));
 
     // Add Y axis
@@ -143,13 +147,21 @@ const ParticleSystem = function() {
       .scaleLinear()
       .domain([0, 1500])
       .range([100, 0]);
-    context.append("g").call(d3.axisLeft(y));
+    context
+      .append("g")
+      .style("fill", "white")
+      .style("stroke", "white")
+      .call(d3.axisLeft(y));
 
     var y2 = d3
       .scaleLinear()
       .domain([0, 1200000])
       .range([120, 250]);
-    context.append("g").call(d3.axisLeft(y2));
+    context
+      .append("g")
+      .style("fill", "white")
+      .style("stroke", "white")
+      .call(d3.axisLeft(y2));
 
     // color palette
     var color = d3
