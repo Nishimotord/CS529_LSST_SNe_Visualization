@@ -94,7 +94,7 @@ const ParticleSystem = function() {
     new THREE.Color("rgb(255,217,47)")
   ];
   var margin = { top: 20, right: 30, bottom: 30, left: 60 },
-    width = 900 - margin.left - margin.right,
+    width = 800 - margin.left - margin.right,
     height = 300 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
@@ -155,14 +155,20 @@ const ParticleSystem = function() {
     var color = d3
       .scaleOrdinal()
       .domain(keys)
-      .range(["#8da0cb", "#66c2a5", "#a6d854", "#e78ac3", "#fc8d62", "#ffd92f"]);
+      .range([
+        "#8da0cb",
+        "#66c2a5",
+        "#a6d854",
+        "#e78ac3",
+        "#fc8d62",
+        "#ffd92f"
+      ]);
 
     //stack the data?
     var stackedData = d3
       .stack()
       .offset(d3.wiggle)
-      .keys(keys)
-      (data);
+      .keys(keys)(data);
 
     // Show the areas
     context
@@ -170,34 +176,36 @@ const ParticleSystem = function() {
       .data(stackedData)
       .enter()
       .append("path")
-      .style("fill", function (d) { return color(d.key); })
-      .attr("d", d3.area()
-        .x(function (d, i) { 
-          // console.log(d);
-          if(d.data.Date < 2020){
-            return x(d.data.Date); 
-          }
-          else{
-            return x2(d.data.Date);
-          }
-        })
-        .y0(function (d) { 
-          if(d.data.Date < 2020){
-            return y(d[0]); 
-          }
-          else {
-            return y2(d[0]);
-          }
-        })
-        .y1(function (d) { 
-          if(d.data.Date < 2020){ 
-            return y(d[1]); 
-          }
-          else {
-            return y2(d[1]);
-          }
-        })
-      )
+      .style("fill", function(d) {
+        return color(d.key);
+      })
+      .attr(
+        "d",
+        d3
+          .area()
+          .x(function(d, i) {
+            // console.log(d);
+            if (d.data.Date < 2020) {
+              return x(d.data.Date);
+            } else {
+              return x2(d.data.Date);
+            }
+          })
+          .y0(function(d) {
+            if (d.data.Date < 2020) {
+              return y(d[0]);
+            } else {
+              return y2(d[0]);
+            }
+          })
+          .y1(function(d) {
+            if (d.data.Date < 2020) {
+              return y(d[1]);
+            } else {
+              return y2(d[1]);
+            }
+          })
+      );
 
     //Add brush variable
     var brush = d3
@@ -460,8 +468,6 @@ const ParticleSystem = function() {
 
   // Draw Legend
   self.drawLegend = function() {
-    $("#DisplayCount").text("Old SNe : " + numOld + " LSST : " + numLsst);
-
     d3.select("#legend")
       .selectAll("text")
       .remove();
@@ -469,91 +475,206 @@ const ParticleSystem = function() {
       .selectAll("circle")
       .remove();
     var svg = d3.select("#legend");
-    svg.attr("background-color", "black");
+
+    svg
+      .append("text")
+      .attr("x", 200)
+      .attr("y", 15)
+      .text("Number of Supernovae Discoveries by Dataset and Type")
+      .style("font-size", "15px")
+      .style("fill", "white")
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "middle");
+    svg
+      .append("text")
+      .attr("x", 200)
+      .attr("y", 36)
+      .text("Between " + yearBounds[0] + " and " + yearBounds[1])
+      .style("font-size", "15px")
+      .style("fill", "white")
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "middle");
+
     svg
       .append("circle")
       .attr("cx", 20)
-      .attr("cy", 15)
+      .attr("cy", 60)
       .attr("r", 10)
       .style("fill", pColors[0]);
     svg
       .append("text")
       .attr("x", 40)
-      .attr("y", 15)
-      .text("Old Type Ia - " + numOldIa)
+      .attr("y", 60)
+      .text("Old Type Ia - ")
       .style("font-size", "15px")
       .style("fill", pColors[0])
       .attr("alignment-baseline", "middle");
     svg
+      .append("text")
+      .attr("x", 200)
+      .attr("y", 60)
+      .text(numOldIa)
+      .style("font-size", "15px")
+      .style("fill", pColors[0])
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+    svg
       .append("circle")
-      .attr("cx", 220)
-      .attr("cy", 15)
+      .attr("cx", 20)
+      .attr("cy", 81)
       .attr("r", 10)
       .style("fill", pColors[2]);
     svg
       .append("text")
-      .attr("x", 240)
-      .attr("y", 15)
-      .text("Old Type I - " + numOldI)
+      .attr("x", 40)
+      .attr("y", 81)
+      .text("Old Type I - ")
       .style("font-size", "15px")
       .style("fill", pColors[2])
       .attr("alignment-baseline", "middle");
     svg
+      .append("text")
+      .attr("x", 200)
+      .attr("y", 81)
+      .text(numOldI)
+      .style("font-size", "15px")
+      .style("fill", pColors[2])
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+    svg
       .append("circle")
-      .attr("cx", 420)
-      .attr("cy", 15)
+      .attr("cx", 20)
+      .attr("cy", 102)
       .attr("r", 10)
       .style("fill", pColors[4]);
     svg
       .append("text")
-      .attr("x", 440)
-      .attr("y", 15)
-      .text("Old Type II - " + numOldII)
+      .attr("x", 40)
+      .attr("y", 102)
+      .text("Old Type II - ")
       .style("font-size", "15px")
       .style("fill", pColors[4])
       .attr("alignment-baseline", "middle");
     svg
+      .append("text")
+      .attr("x", 200)
+      .attr("y", 102)
+      .text(numOldII)
+      .style("font-size", "15px")
+      .style("fill", pColors[4])
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+
+    svg
       .append("circle")
-      .attr("cx", 20)
-      .attr("cy", 36)
+      .attr("cx", 220)
+      .attr("cy", 60)
       .attr("r", 10)
       .style("fill", pColors[1]);
     svg
       .append("text")
-      .attr("x", 40)
-      .attr("y", 36)
-      .text("Lsst Type Ia - " + numLsstIa)
+      .attr("x", 240)
+      .attr("y", 60)
+      .text("LSST Type Ia - ")
       .style("font-size", "15px")
       .style("fill", pColors[1])
       .attr("alignment-baseline", "middle");
     svg
+      .append("text")
+      .attr("x", 400)
+      .attr("y", 60)
+      .text(numLsstIa)
+      .style("font-size", "15px")
+      .style("fill", pColors[1])
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+    svg
       .append("circle")
       .attr("cx", 220)
-      .attr("cy", 36)
+      .attr("cy", 81)
       .attr("r", 10)
       .style("fill", pColors[3]);
     svg
       .append("text")
       .attr("x", 240)
-      .attr("y", 36)
-      .text("LSST Type I - " + numLsstI)
+      .attr("y", 81)
+      .text("LSST Type I - ")
       .style("font-size", "15px")
       .style("fill", pColors[3])
       .attr("alignment-baseline", "middle");
     svg
+      .append("text")
+      .attr("x", 400)
+      .attr("y", 81)
+      .text(numLsstI)
+      .style("font-size", "15px")
+      .style("fill", pColors[3])
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+    svg
       .append("circle")
-      .attr("cx", 420)
-      .attr("cy", 36)
+      .attr("cx", 220)
+      .attr("cy", 102)
       .attr("r", 10)
       .style("fill", pColors[5]);
     svg
       .append("text")
-      .attr("x", 440)
-      .attr("y", 36)
-      .text("LSST Type II - " + numLsstII)
+      .attr("x", 240)
+      .attr("y", 102)
+      .text("LSST Type II - ")
       .style("font-size", "15px")
       .style("fill", pColors[5])
       .attr("alignment-baseline", "middle");
+    svg
+      .append("text")
+      .attr("x", 400)
+      .attr("y", 102)
+      .text(numLsstII)
+      .style("font-size", "15px")
+      .style("fill", pColors[5])
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+
+    svg
+      .append("text")
+      .attr("x", 40)
+      .attr("y", 125)
+      .text("Old Total - ")
+      .style("font-size", "15px")
+      .style("fill", "white")
+      .attr("alignment-baseline", "middle");
+    svg
+      .append("text")
+      .attr("x", 200)
+      .attr("y", 125)
+      .text(numOld)
+      .style("font-size", "15px")
+      .style("fill", "white")
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+
+    svg
+      .append("text")
+      .attr("x", 240)
+      .attr("y", 125)
+      .text("LSST Total - ")
+      .style("font-size", "15px")
+      .style("fill", "white")
+      .attr("alignment-baseline", "middle");
+    svg
+      .append("text")
+      .attr("x", 400)
+      .attr("y", 125)
+      .text(numLsst)
+      .style("font-size", "15px")
+      .style("fill", "white")
+      .attr("alignment-baseline", "middle")
+      .attr("text-anchor", "end");
+
+    //reposition
+    var w = d3.select(".particleDiv").node().clientWidth;
+    var h = w / 2.5;
+    $("#legend").css({ top: h - 60, left: w - 700, position: "absolute" });
   };
   self.buildGroups = function() {
     // Don't make any changes if there is no data to change
@@ -620,6 +741,7 @@ const ParticleSystem = function() {
       }
       console.log(numOld);
       console.log(numLsst);
+      self.drawLegend();
       self.drawLegend();
     }
   };

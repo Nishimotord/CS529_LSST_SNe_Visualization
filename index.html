@@ -1,16 +1,18 @@
 ﻿<!DOCTYPE html>
 <html>
-<head>
+  <head>
     <meta charset="utf-8" />
 
     <title>
-        Visualizing Supernovae from The Open Supernova Catalog and Large Synoptic
-        Survey Telescope
+      Visualizing Supernovae from The Open Supernova Catalog and Large Synoptic
+      Survey Telescope
     </title>
 
     <!-- CSS Libraries -->
-    <link rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
     <!-- CSS Source -->
     <link rel="stylesheet" href="./src/css/main.css" />
 
@@ -31,51 +33,77 @@
     <script src="./src/js/particleSystem.js"></script>
     <script src="./src/js/main.js"></script>
 
-    <link rel="stylesheet" href="./src/css/welcomeScreen.css">
+    <link rel="stylesheet" href="./src/css/welcomeScreen.css" />
     <style>
-
-        #help {
-            background-color: transparent;
-            background-repeat: no-repeat;
-            border: none;
-            cursor: pointer;
-            overflow: hidden;
-            outline: none;
-            float: right;
-        }
+      #help {
+        background-color: transparent;
+        background-repeat: no-repeat;
+        border: none;
+        cursor: pointer;
+        overflow: hidden;
+        outline: none;
+        float: right;
+      }
+      #reset {
+        background-color: darkred;
+        color: antiquewhite;
+        background-repeat: no-repeat;
+        border-radius: 50%;
+        float: right;
+      }
     </style>
-</head>
+  </head>
 
-<body onload="App.start();">
-    <div class="container-fluid">
-        <div id="boxes">
-            <div style="top: 50%; left: 50%; display: none;" id="dialog" class="window">
-                <div id="san">
-                    <a href="#" class="close agree"><img src="./imgs/close2.png" width="25" style="float:right; margin-right: -25px; margin-top: -30px;"></a>
-                    <h1> SNe Visualization </h1>
-                    <p></p>
-                </div>
-            </div>
-            <div style="width: 1000px; font-size: 32pt; color:greenyellow; height: 1202px; display: none; opacity: 0.4;" id="mask"></div>
+  <body onload="App.start();">
+    <div class="container-fluid" style="background-color: black">
+      <div id="boxes">
+        <div
+          style="top: 50%; left: 50%; display: none;"
+          id="dialog"
+          class="window"
+        >
+          <div id="san">
+            <a href="#" class="close agree"
+              ><img
+                src="./imgs/close2.png"
+                width="25"
+                style="float:right; margin-right: -25px; margin-top: -30px;"
+            /></a>
+            <h1>SNe Visualization</h1>
+            <p></p>
+          </div>
         </div>
-        <div class="row">
-            <div class="particleDiv">
-                <div id="scene">
-                    <div id="slider"></div>
-                </div>
-            </div>
+        <div
+          style="width: 1000px; font-size: 32pt; color:greenyellow; height: 1202px; display: none; opacity: 0.4;"
+          id="mask"
+        ></div>
+      </div>
+      <div class="row">
+        <div class="particleDiv">
+          <div id="scene"></div>
         </div>
-        <div >
-            <button id="help"> <img src="./imgs/questionMark.png" width="25"></button>
+      </div>
+      <!-- Create a div where the graph and legend will take place -->
+      <div class="row">
+        <div id="my_datavizLSST" style="background-color: whitesmoke"></div>
+        <div>
+          <svg
+            id="legend"
+            height="135"
+            width="450"
+            style="stroke-width: 0px;background-color: black"
+          ></svg>
+          <text id="DisplayCount" style="color:black"></text>
         </div>
-
-        <svg id="legend"
-             height="60"
-             width="1500"
-             style="stroke-width: 0px;background-color: white"></svg>
-        <text id="DisplayCount" x="600" y="20"></text>
-      <!-- Create a div where the graph will take place -->
-      <div id="my_datavizLSST"></div>
+      </div>
+      <div>
+        <button id="help">
+          <img src="./imgs/questionMark.png" width="25" />
+        </button>
+      </div>
+      <div>
+        <button id="reset">Reset</button>
+      </div>
     </div>
-</body>
+  </body>
 </html>
