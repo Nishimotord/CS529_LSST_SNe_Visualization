@@ -438,7 +438,6 @@ const ParticleSystem = function() {
     unselectedOpacity = val;
     self.updateParticleSettings();
   });
-  filterFolder.open();
   settingsFolder.open();
 
   self.updateTypeView = function(typeIndex, typeMaterialID, show) {
